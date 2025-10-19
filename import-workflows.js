@@ -1,77 +1,111 @@
 /**
- * Import n8n workflows by copying to default n8n workflow directory
+ * Import n8n workflows using n8n's CLI import command
  * 
- * This script copies workflow files to n8n's default workflow directory
- * so they are automatically loaded when n8n starts.
+ * This script imports workflow files into n8n's database using the CLI
  */
 
+const { spawn, exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { promisify } = require('util');
 require('dotenv').config();
-
-const access = promisify(fs.access);
-const mkdir = promisify(fs.mkdir);
-const copyFile = promisify(fs.copyFile);
 
 const WORKFLOW_FILES = [
   'youtube_automation_source.json',
-  'youtube_automation_game.json',
+  'youtube_automation_game.json', 
   'youtube_automation_trend.json'
 ];
-
-async function ensureWorkflowDirectory() {
-  // n8n default workflow directory
-  const workflowDir = path.join(__dirname, '.n8n', 'workflows');
-  
-  try {
-    await access(workflowDir, fs.constants.F_OK);
-    console.log(`✅ Workflow directory exists: ${workflowDir}`);
-  } catch (error) {
-    // Directory doesn't exist, create it
-    await mkdir(workflowDir, { recursive: true });
-    console.log(`✅ Created workflow directory: ${workflowDir}`);
-  }
-  
-  return workflowDir;
-}
 
 async function importWorkflows() {
   console.log('🔄 Starting workflow import process...');
   
-  // Ensure the workflow directory exists
-  const workflowDir = await ensureWorkflowDirectory();
-  
-  for (const workflowFile of WORKFLOW_FILES) {
-    const sourcePath = path.join(__dirname, workflowFile);
-    
-    try {
-      // Check if source file exists
-      await access(sourcePath, fs.constants.F_OK);
-      console.log(`📥 Processing workflow: ${workflowFile}`);
-      
-      // Copy workflow file to n8n's default workflow directory
-      const destPath = path.join(workflowDir, workflowFile);
-      await copyFile(sourcePath, destPath);
-      
-      console.log(`✅ Workflow copied to n8n: ${workflowFile}`);
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        console.log(`⚠️  Workflow file not found: ${workflowFile}`);
-      } else {
-        console.error(`❌ Error copying workflow ${workflowFile}:`, error.message);
+  // Verify n8n is available
+  try {
+    exec('n8n --version', { stdio: 'pipe' }, (error) => {
+      if (error) {
+        console.error('❌ n8n is not available in this environment');
+        console.error('Error details:', error.message);
+        process.exit(1);
       }
-    }
+    });
+  } catch (error) {
+    console.error('❌ n8n is not available:', error.message);
+    process.exit(1);
   }
   
-  console.log('✅ Workflow import process completed. Workflows will be available when n8n starts.');
+  let successCount = 0;
+  
+  for (const workflowFile of WORKFLOW_FILES) {
+    const workflowPath = path.join(__dirname, workflowFile);
+    
+    if (!fs.existsSync(workflowPath)) {
+      console.log(`⚠️  Workflow file not found: ${workflowFile}`);
+      continue;
+    }
+    
+    console.log(`📥 Importing workflow: ${workflowFile}`);
+    
+    try {
+      // Verify the workflow file is valid JSON
+      const workflowContent = fs.readFileSync(workflowPath, 'utf8');
+      JSON.parse(workflowContent);
+      console.log(`   - Workflow file is valid JSON`);
+    } catch (error) {
+      console.error(`❌ Workflow file is not valid JSON: ${workflowFile}`, error.message);
+      continue;
+    }
+    
+    // Use n8n CLI to import workflow
+    await new Promise((resolve, reject) => {
+      const importProcess = spawn('n8n', ['import:workflow', '--input', workflowPath, '--force'], {
+        stdio: ['pipe', 'pipe', 'pipe'],
+        env: { ...process.env }
+      });
+      
+      let stdout = '';
+      let stderr = '';
+      
+      importProcess.stdout.on('data', (data) => {
+        stdout += data.toString();
+      });
+      
+      importProcess.stderr.on('data', (data) => {
+        stderr += data.toString();
+      });
+      
+      importProcess.on('close', (code) => {
+        if (code === 0) {
+          console.log(`✅ Successfully imported workflow: ${workflowFile}`);
+          successCount++;
+        } else {
+          console.log(`❌ Failed to import workflow: ${workflowFile}`);
+          console.log(`   Exit code: ${code}`);
+          if (stderr) console.log(`   Error: ${stderr}`);
+          if (stdout) console.log(`   Output: ${stdout}`);
+        }
+        resolve();
+      });
+      
+      importProcess.on('error', (error) => {
+        console.error(`❌ Error spawning import process for ${workflowFile}:`, error.message);
+        resolve();
+      });
+    });
+  }
+  
+  console.log(`✅ Workflow import process completed. ${successCount}/${WORKFLOW_FILES.length} workflows imported successfully.`);
+  
+  if (successCount === 0) {
+    console.error('❌ No workflows were imported successfully. This will result in an empty dashboard.');
+    process.exit(1);
+  }
 }
 
 // Run the import
 if (require.main === module) {
   importWorkflows()
     .then(() => {
-      console.log('🎉 All workflow preparations completed!');
+      console.log('🎉 Workflow import completed!');
+      process.exit(0);
     })
     .catch(error => {
       console.error('❌ Error during workflow import:', error);

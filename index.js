@@ -49,6 +49,11 @@ process.env.N8N_METADATA_DB_TABLE_NAMES = process.env.N8N_METADATA_DB_TABLE_NAME
 // Use default SQLite for workflow storage to avoid conflicts with Supabase
 process.env.N8N_DB_TYPE = 'sqlite';
 process.env.DB_SQLITE_PATH = './n8n-database.db';
+// Enable workflow sharing (allows viewing in UI)
+process.env.N8N_WORKFLOW_TAGS_DISABLED = 'false';
+process.env.N8N_USER_MANAGEMENT_DISABLED = 'false';
+// Setup basic authentication to ensure dashboard access
+process.env.N8N_BASIC_AUTH_ACTIVE = 'false'; // Keeping false as per original config
 
 // Determine the base URL based on environment
 const getBaseUrl = () => {

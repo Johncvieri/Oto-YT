@@ -39,6 +39,10 @@
     "N8N_METADATA_DB_TABLE_NAMES": { "value": "true", "type": "string" },
     "N8N_DB_TYPE": { "value": "sqlite", "type": "string" },
     "DB_SQLITE_PATH": { "value": "./n8n-database.db", "type": "string" },
+    "N8N_USER_MANAGEMENT_DISABLED": { "value": "true", "type": "string" },
+    "N8N_METRICS": { "value": "false", "type": "string" },
+    "N8N_NPS_DISABLED": { "value": "true", "type": "string" },
+    "N8N_TELEMETRY_DISABLED": { "value": "true", "type": "string" },
     "NIXPACKS_NODE_PRUNE": { "value": "true", "type": "string" },
     "NPM_CONFIG_PRODUCTION": { "value": "false", "type": "string" }
   },
