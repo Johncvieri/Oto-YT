@@ -1,0 +1,181 @@
+{
+  "name": "YouTube Automation - Trend Analysis (Free Tier Compatible)",
+  "nodes": [
+    {
+      "parameters": {
+        "cronExpression": "0 12 * * *",
+        "timezone": "Asia/Jakarta"
+      },
+      "name": "Cron Trigger 12h",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&q=trending&key={{$credentials.youtubeApi.apiKey}}&regionCode=ID",
+        "responseFormat": "json"
+      },
+      "name": "Fetch General Trends from YouTube",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "youtubeApi": {
+          "id": "1",
+          "name": "YouTube Account1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Parse YouTube API response and extract trending videos\nconst items = items[0].json.items;\n\n// Select a random trending video from search results\nconst pick = items[Math.floor(Math.random()*items.length)];\n\n// Extract video information\nconst videoInfo = pick.snippet;\n\n// Return the trending video info\nreturn [{json:{\n  videoId: pick.id.videoId,\n  title: videoInfo.title,\n  description: videoInfo.description,\n  channelTitle: videoInfo.channelTitle,\n  publishedAt: videoInfo.publishedAt,\n  originalUrl: `https://youtube.com/watch?v=${pick.id.videoId}`\n}}];"
+      },
+      "name": "Parse Trending Video",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Select trend-specific template and create educational script\nconst fs = require('fs');\nconst path = require('path');\n\nconst assetDir = './assets';\nconst files = fs.readdirSync(assetDir);\n\n// Trend-specific templates\nconst trendTemplates = [\n  'Trend_Analysis_Template.mp4',\n  'Quick_Viral_Insight_Template.mp4',\n  'Trend_Education_Template.mp4',\n  'Social_Phenomenon_Template.mp4'\n];\n\n// Select available trend template\nconst availableTemplates = trendTemplates.filter(template => \n  files.includes(template)\n);\n\nconst selectedTemplate = availableTemplates.length > 0 \n  ? availableTemplates[Math.floor(Math.random() * availableTemplates.length)]\n  : 'Trend_Analysis_Template.mp4'; // fallback\n\n// Create trend-focused script from trending video\nconst trendingTitle = $json.title;\nconst trendInsightTypes = [\n  `Analisis tren: ${trendingTitle.substring(0, 35)}`,\n  `Mengapa ${trendingTitle.substring(0, 30)} viral?`,\n  `Fenomena sosial: ${trendingTitle.substring(0, 35)}`,\n  `Pelajaran dari tren: ${trendingTitle.substring(0, 35)}`\n];\n\nconst randomInsight = trendInsightTypes[Math.floor(Math.random() * trendInsightTypes.length)];\n\nreturn [{\n  json: {\n    videoFile: path.join(assetDir, selectedTemplate),\n    originalVideoId: $json.videoId,\n    originalTitle: $json.title,\n    title: randomInsight,\n    script: `${randomInsight}. Ayo bahas lebih lanjut!`,\n    description: `Analisis dari tren trending: ${trendingTitle}. \\n\\nApa yang bisa kita pelajari dari fenomena ini?`,\n    tags: 'tren,viral,analisis,sosial,edukasi,insight,youtube',\n    originalTopic: trendingTitle,\n    account: 'Account3'\n  }\n}];"
+      },
+      "name": "Select Trend Template & Script",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [950, 300]
+    },
+    {
+      "parameters": {
+        "operation": "uploadVideo",
+        "videoFile": "={{$json.videoFile}}",
+        "title": "={{$json.title}}",
+        "description": "={{$json.description}}",
+        "tags": "={{$json.tags}}",
+        "privacyStatus": "public",
+        "retryOnFail": true,
+        "retryAttempts": 3
+      },
+      "name": "Upload to YouTube Trend",
+      "type": "n8n-nodes-base.youtube",
+      "typeVersion": 1,
+      "position": [1200, 300],
+      "credentials": {
+        "youtubeApi": {
+          "id": "3",
+          "name": "YouTube Account3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "query": "INSERT INTO video_engagement (video_id, account, title, description, tags, trending_topic, upload_time, views, likes, comments) VALUES ($1, 'Account3', $2, $3, $4, $5, NOW(), 0, 0, 0)",
+        "additionalFields": {
+          "values": [
+            "{{$json['videoId']}}",
+            "{{$json.title}}",
+            "{{$json.description}}",
+            "{{$json.tags}}",
+            "{{$json.originalTopic}}"
+          ]
+        }
+      },
+      "name": "Update Trend Engagement in DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1450, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Supabase Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{process.env.TELEGRAM_CHAT_ID}}",
+        "text": "🌟 Trend Video Diupload!\\n\\nAkun: Account3\\nTitle: {{$json.title}}\\n\\nSumber Tren: {{$json.originalTopic}}\\n\\nVideo ID: {{$json['videoId']}}",
+        "additionalFields": {}
+      },
+      "name": "Send Trend Telegram Notification",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [1700, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "1",
+          "name": "Telegram Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron Trigger 12h": {
+      "main": [
+        [
+          {
+            "node": "Fetch General Trends from YouTube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch General Trends from YouTube": {
+      "main": [
+        [
+          {
+            "node": "Parse Trending Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Trending Video": {
+      "main": [
+        [
+          {
+            "node": "Select Trend Template & Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Trend Template & Script": {
+      "main": [
+        [
+          {
+            "node": "Upload to YouTube Trend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to YouTube Trend": {
+      "main": [
+        [
+          {
+            "node": "Update Trend Engagement in DB",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Trend Telegram Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "saveManualExecutions": true,
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

@@ -1,0 +1,175 @@
+{
+  "name": "YouTube Automation - Source Based (Free Tier Compatible)",
+  "nodes": [
+    {
+      "parameters": {
+        "cronExpression": "0 12 * * *",
+        "timezone": "Asia/Jakarta"
+      },
+      "name": "Cron Trigger 12h",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://www.youtube.com/feeds/videos.xml?chart=mostPopular&regionCode=ID",
+        "responseFormat": "text"
+      },
+      "name": "Fetch Trending RSS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Parse XML and extract trending topics\nconst parser = require('fast-xml-parser');\nconst xml = items[0].json.body;\nconst jObj = parser.parse(xml);\nconst entries = jObj.feed.entry;\n\n// Select a trending video with additional metadata\nconst pick = entries[Math.floor(Math.random()*entries.length)];\n\n// Extract video ID from link\nconst videoId = pick.link[0].href.split('v=')[1];\n\n// Return the trending video info\nreturn [{json:{\n  videoId: videoId,\n  title: pick.title,\n  published: pick.published,\n  author: pick.author.name,\n  originalUrl: pick.link[0].href\n}}];"
+      },
+      "name": "Parse Trending Video",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Select appropriate template based on video category\nconst fs = require('fs');\nconst path = require('path');\n\nconst assetDir = './assets';\nconst files = fs.readdirSync(assetDir);\n\n// Template categories\nconst templateCategories = {\n  'education': ['Life_Lesson_Template.mp4', 'Analysis_Template.mp4'],\n  'entertainment': ['Quick_Insight_Template.mp4', 'Review_Template.mp4'],\n  'gaming': ['Game_Insight_Template.mp4', 'Gaming_Analysis_Template.mp4']\n};\n\n// Determine category based on title keywords\nlet category = 'education'; // default\nconst title = $json.title.toLowerCase();\n\nif (title.includes('game') || title.includes('play')) {\n  category = 'gaming';\n} else if (title.includes('fun') || title.includes('meme') || title.includes('viral')) {\n  category = 'entertainment';\n}\n\nconst categoryTemplates = templateCategories[category];\nconst availableTemplates = categoryTemplates.filter(template => \n  files.includes(template)\n);\n\n// Fallback to any available template if category not found\nlet selectedTemplate;\nif (availableTemplates.length > 0) {\n  selectedTemplate = availableTemplates[Math.floor(Math.random() * availableTemplates.length)];\n} else {\n  selectedTemplate = files.filter(f => f.endsWith('.mp4'))[0] || 'default_template.mp4';\n}\n\n// Create educational script from trending video\nconst trendingTitle = $json.title;\nconst insightTypes = [\n  `Apa pelajaran dari tren ini: ${trendingTitle.substring(0, 50)}`,\n  `Mengapa ${trendingTitle.substring(0, 30)} menjadi viral?`,\n  `Fakta menarik: ${trendingTitle.substring(0, 40)}`,\n  `Perspektif baru: ${trendingTitle.substring(0, 40)}`\n];\n\nconst randomInsight = insightTypes[Math.floor(Math.random() * insightTypes.length)];\n\nreturn [{\n  json: {\n    videoFile: path.join(assetDir, selectedTemplate),\n    originalVideoId: $json.videoId,\n    originalTitle: $json.title,\n    title: randomInsight,\n    script: `${randomInsight}. Ayo bahas lebih lanjut!`,\n    description: `Analisis dari video trending: ${trendingTitle}. \\n\\nApa pelajaran yang bisa kita ambil?`,\n    tags: 'analisis,youtube,trending,viral,edukasi,insight',\n    originalTopic: trendingTitle,\n    account: 'Account1'\n  }\n}];"
+      },
+      "name": "Select Template & Create Script",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [950, 300]
+    },
+    {
+      "parameters": {
+        "operation": "uploadVideo",
+        "videoFile": "={{$json.videoFile}}",
+        "title": "={{$json.title}}",
+        "description": "={{$json.description}}",
+        "tags": "={{$json.tags}}",
+        "privacyStatus": "public",
+        "retryOnFail": true,
+        "retryAttempts": 3
+      },
+      "name": "Upload to YouTube",
+      "type": "n8n-nodes-base.youtube",
+      "typeVersion": 1,
+      "position": [1200, 300],
+      "credentials": {
+        "youtubeApi": {
+          "id": "1",
+          "name": "YouTube Account1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "query": "INSERT INTO video_engagement (video_id, account, title, description, tags, trending_topic, upload_time, views, likes, comments) VALUES ($1, 'Account1', $2, $3, $4, $5, NOW(), 0, 0, 0)",
+        "additionalFields": {
+          "values": [
+            "{{$json['videoId']}}",
+            "{{$json.title}}",
+            "{{$json.description}}",
+            "{{$json.tags}}",
+            "{{$json.originalTopic}}"
+          ]
+        }
+      },
+      "name": "Update Engagement in DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1450, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Supabase Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{process.env.TELEGRAM_CHAT_ID}}",
+        "text": "🎬 Video Baru Diupload!\\n\\nAkun: Account1\\nTitle: {{$json.title}}\\n\\nSumber Trend: {{$json.originalTopic}}\\n\\nVideo ID: {{$json['videoId']}}",
+        "additionalFields": {}
+      },
+      "name": "Send Telegram Notification",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [1700, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "1",
+          "name": "Telegram Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron Trigger 12h": {
+      "main": [
+        [
+          {
+            "node": "Fetch Trending RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Trending RSS": {
+      "main": [
+        [
+          {
+            "node": "Parse Trending Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Trending Video": {
+      "main": [
+        [
+          {
+            "node": "Select Template & Create Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Template & Create Script": {
+      "main": [
+        [
+          {
+            "node": "Upload to YouTube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to YouTube": {
+      "main": [
+        [
+          {
+            "node": "Update Engagement in DB",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Telegram Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "saveManualExecutions": true,
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

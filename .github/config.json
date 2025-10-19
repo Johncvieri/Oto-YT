@@ -1,0 +1,38 @@
+{
+  "github_integration": {
+    "enabled": true,
+    "auto_deploy": true,
+    "backup_enabled": true,
+    "config_sync": true,
+    "version_tags": true,
+    "repository": {
+      "owner": "your-username",
+      "name": "youtube-automation",
+      "branch": "main"
+    },
+    "workflows": {
+      "ci_cd": {
+        "file": ".github/workflows/ci-cd.yml",
+        "triggers": ["push", "pull_request", "workflow_dispatch"],
+        "environments": ["development", "production"]
+      }
+    },
+    "backup_settings": {
+      "auto_backup": true,
+      "backup_schedule": "daily",
+      "retention_days": 30
+    },
+    "deployment": {
+      "environments": ["development", "staging", "production"],
+      "auto_promote": false,
+      "notification_channels": ["telegram"]
+    },
+    "api_integration": {
+      "github_api_key": {
+        "required": true,
+        "description": "GitHub API key for integration with Supabase and Gemini services",
+        "usage": ["supabase_sync", "gemini_enhancement", "repository_management"]
+      }
+    }
+  }
+}

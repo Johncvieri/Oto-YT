@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  youtube-automation:
+    build: .
+    container_name: youtube-automation
+    restart: unless-stopped
+    # Optimized for daily uploads (1 video per account per day) to minimize resource usage
+    # This configuration is ideal for Railway free tier due to reduced processing demands
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-admin}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-admin}
+      - N8N_SECURE_COOKIE=false  # Set to true in production with HTTPS
+    volumes:
+      - ./assets:/app/assets
+      - ./temp:/app/temp
+      - ./upload:/app/upload
+      - n8n_data:/home/node/.n8n
+    ports:
+      - "5678:5678"  # n8n web UI
+    networks:
+      - youtube-network
+
+  # Optional: Database container if needed
+  # db:
+  #   image: postgres:15
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB: youtube_automation
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
+  #   networks:
+  #     - youtube-network
+  #   ports:
+  #     - "5432:5432"
+
+volumes:
+  n8n_data:
+  # db_data:
+
+networks:
+  youtube-network:
+    driver: bridge

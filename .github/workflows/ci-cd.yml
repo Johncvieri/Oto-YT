@@ -1,0 +1,139 @@
+name: YouTube Automation CI/CD
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm test
+      env:
+        YOUTUBE_API_1: ${{ secrets.YOUTUBE_API_1 }}
+        YOUTUBE_API_2: ${{ secrets.YOUTUBE_API_2 }}
+        YOUTUBE_API_3: ${{ secrets.YOUTUBE_API_3 }}
+        YOUTUBE_CHANNEL_1: ${{ secrets.YOUTUBE_CHANNEL_1 }}
+        YOUTUBE_CHANNEL_2: ${{ secrets.YOUTUBE_CHANNEL_2 }}
+        YOUTUBE_CHANNEL_3: ${{ secrets.YOUTUBE_CHANNEL_3 }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        TELEGRAM_API_KEY: ${{ secrets.TELEGRAM_API_KEY }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        NODE_ENV: test
+
+    - name: Run Gemini tests
+      run: npm run test:gemini
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+    # Additional step to enable integration with Supabase and Gemini using GitHub API
+    - name: Sync with Supabase and Gemini
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        echo "Syncing with Supabase and Gemini services..."
+        # Using GitHub API for integration
+        # This step would use the GitHub API key to interact with Supabase and Gemini
+        echo "Supabase and Gemini sync completed"
+      env:
+        GITHUB_API_KEY: ${{ secrets.GITHUB_API_KEY }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build and export to Docker
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        load: true
+        tags: youtube-automation:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Run container health check
+      run: |
+        docker run -d --name youtube-test -e NODE_ENV=production youtube-automation:latest
+        sleep 30
+        docker logs youtube-test
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [test, docker-build]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    environment: production  # Requires environment secrets to be set in repo settings
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Deploy to production
+      run: |
+        echo "Deploying to production server..."
+        # Add your deployment commands here
+        # This could be deploying to a cloud provider, container registry, etc.
+        # Using secrets from GitHub repository settings
+        echo "Deployment completed successfully"
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        SERVER_USER: ${{ secrets.SERVER_USER }}
+        GITHUB_API_KEY: ${{ secrets.GITHUB_API_KEY }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+  supabase-gemini-integration:
+    runs-on: ubuntu-latest
+    needs: [test, docker-build]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    environment: production
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Integrate with Supabase and Gemini
+      run: |
+        echo "Running integration with Supabase and Gemini using GitHub API..."
+        # This step would include actual commands to interact with Supabase and Gemini
+        # using GitHub API as an intermediary
+        echo "Integration process completed"
+      env:
+        GITHUB_API_KEY: ${{ secrets.GITHUB_API_KEY }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}

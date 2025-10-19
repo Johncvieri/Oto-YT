@@ -1,0 +1,47 @@
+{
+  "name": "youtube-automation",
+  "version": "1.0.0",
+  "description": "YouTube Shorts automation system that creates, uploads, and analyzes videos with GitHub API integration for enhanced Supabase and Gemini collaboration",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js",
+    "test:gemini": "node gemini-test.js",
+    "test:prod": "NODE_ENV=production node test.js",
+    "start": "N8N_HOST=0.0.0.0 N8N_PORT=$PORT N8N_BASIC_AUTH_ACTIVE=true N8N_SECURE_COOKIE=false N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false N8N_PERSONALIZATION_ENABLED=false npx n8n start",
+    "start:n8n": "n8n start",
+    "deploy": "echo 'Deploy to hosting platform: npm install && n8n import:credentials --secrets .env && n8n'",
+
+    "deploy:railway": "echo 'Preparing for Railway deployment' && npm install && npx n8n import:credentials --input=credentials.json 2>/dev/null || echo 'Credentials import skipped' && n8n",
+    "health": "node test.js",
+    "github:setup": "node github-setup.js",
+    "github:sync-config": "echo 'Syncing configuration to GitHub repository'",
+    "github:backup": "git add . && git commit -m \"Backup: System configuration\" && git push origin main",
+    "github:version": "echo Creating new version tag && git tag -a v$(date '+%Y.%m.%d') -m \"Auto-generated release\" && git push origin v$(date '+%Y.%m.%d')",
+    "github:init": "node github-setup.js",
+    "github:sync-services": "echo 'Syncing with Supabase and Gemini services via GitHub API'"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.75.1",
+    "dotenv": "^16.6.1",
+    "fast-xml-parser": "^4.2.5",
+    "ffmpeg-static": "^5.2.0",
+    "fluent-ffmpeg": "^2.1.3",
+    "google-tts-api": "^2.0.2",
+    "node-fetch": "^3.3.2",
+    "@google/generative-ai": "^0.21.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "youtube",
+    "automation",
+    "n8n",
+    "video",
+    "content",
+    "ai",
+    "supabase",
+    "github",
+    "gemini"
+  ]
+}

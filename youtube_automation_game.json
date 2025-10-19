@@ -1,0 +1,175 @@
+{
+  "name": "YouTube Automation - Game Insights (Free Tier Compatible)",
+  "nodes": [
+    {
+      "parameters": {
+        "cronExpression": "0 12 * * *",
+        "timezone": "Asia/Jakarta"
+      },
+      "name": "Cron Trigger 12h",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://www.youtube.com/feeds/videos.xml?search=game&regionCode=ID",
+        "responseFormat": "text"
+      },
+      "name": "Fetch Trending Game Videos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Parse XML and extract trending game videos\nconst parser = require('fast-xml-parser');\nconst xml = items[0].json.body;\nconst jObj = parser.parse(xml);\nconst entries = jObj.feed.entry;\n\n// Select a trending game video\nconst pick = entries[Math.floor(Math.random()*entries.length)];\n\n// Extract video ID from link\nconst videoId = pick.link[0].href.split('v=')[1];\n\n// Return the trending game video info\nreturn [{json:{\n  videoId: videoId,\n  title: pick.title,\n  published: pick.published,\n  author: pick.author.name,\n  originalUrl: pick.link[0].href\n}}];"
+      },
+      "name": "Parse Trending Game Video",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Select game-specific template and create educational script\nconst fs = require('fs');\nconst path = require('path');\n\nconst assetDir = './assets';\nconst files = fs.readdirSync(assetDir);\n\n// Game-specific templates\nconst gameTemplates = [\n  'Game_Insight_Template.mp4',\n  'Gaming_Tips_Template.mp4',\n  'Game_Analysis_Template.mp4',\n  'Quick_Gaming_Insight_Template.mp4'\n];\n\n// Select available game template\nconst availableTemplates = gameTemplates.filter(template => \n  files.includes(template)\n);\n\nconst selectedTemplate = availableTemplates.length > 0 \n  ? availableTemplates[Math.floor(Math.random() * availableTemplates.length)]\n  : 'Game_Insight_Template.mp4'; // fallback\n\n// Create game-focused script from trending video\nconst trendingTitle = $json.title;\nconst gameInsightTypes = [\n  `Apa yang ${trendingTitle.substring(0, 30)} ajarkan tentang gameplay?`,\n  `Kenapa game ini viral: ${trendingTitle.substring(0, 40)}?`,\n  `Tips dari ${trendingTitle.substring(0, 30)} | Pelajaran Gaming`,\n  `Analisis game: ${trendingTitle.substring(0, 35)}`\n];\n\nconst randomInsight = gameInsightTypes[Math.floor(Math.random() * gameInsightTypes.length)];\n\nreturn [{\n  json: {\n    videoFile: path.join(assetDir, selectedTemplate),\n    originalVideoId: $json.videoId,\n    originalTitle: $json.title,\n    title: randomInsight,\n    script: `${randomInsight}. Ayo bahas lebih lanjut!`,\n    description: `Analisis dari video game trending: ${trendingTitle}. \\n\\nApa pelajaran atau tips yang bisa kita ambil dari gameplay ini?`,\n    tags: 'game,gaming,insight,tips,viral,youtube,shorts',\n    originalTopic: trendingTitle,\n    account: 'Account2'\n  }\n}];"
+      },
+      "name": "Select Game Template & Script",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [950, 300]
+    },
+    {
+      "parameters": {
+        "operation": "uploadVideo",
+        "videoFile": "={{$json.videoFile}}",
+        "title": "={{$json.title}}",
+        "description": "={{$json.description}}",
+        "tags": "={{$json.tags}}",
+        "privacyStatus": "public",
+        "retryOnFail": true,
+        "retryAttempts": 3
+      },
+      "name": "Upload to YouTube Game",
+      "type": "n8n-nodes-base.youtube",
+      "typeVersion": 1,
+      "position": [1200, 300],
+      "credentials": {
+        "youtubeApi": {
+          "id": "2",
+          "name": "YouTube Account2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "query": "INSERT INTO video_engagement (video_id, account, title, description, tags, trending_topic, upload_time, views, likes, comments) VALUES ($1, 'Account2', $2, $3, $4, $5, NOW(), 0, 0, 0)",
+        "additionalFields": {
+          "values": [
+            "{{$json['videoId']}}",
+            "{{$json.title}}",
+            "{{$json.description}}",
+            "{{$json.tags}}",
+            "{{$json.originalTopic}}"
+          ]
+        }
+      },
+      "name": "Update Game Engagement in DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1450, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Supabase Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{process.env.TELEGRAM_CHAT_ID}}",
+        "text": "🎮 Game Video Diupload!\\n\\nAkun: Account2\\nTitle: {{$json.title}}\\n\\nSumber Game Trend: {{$json.originalTopic}}\\n\\nVideo ID: {{$json['videoId']}}",
+        "additionalFields": {}
+      },
+      "name": "Send Game Telegram Notification",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [1700, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "1",
+          "name": "Telegram Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron Trigger 12h": {
+      "main": [
+        [
+          {
+            "node": "Fetch Trending Game Videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Trending Game Videos": {
+      "main": [
+        [
+          {
+            "node": "Parse Trending Game Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Trending Game Video": {
+      "main": [
+        [
+          {
+            "node": "Select Game Template & Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Game Template & Script": {
+      "main": [
+        [
+          {
+            "node": "Upload to YouTube Game",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to YouTube Game": {
+      "main": [
+        [
+          {
+            "node": "Update Game Engagement in DB",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Game Telegram Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "saveManualExecutions": true,
+    "executionOrder": "v1"
+  },
+  "tags": []
+}
