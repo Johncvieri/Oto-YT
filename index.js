@@ -5,16 +5,17 @@
  * with AI-powered enhancements for YouTube content automation.
  */
 
-// Set environment variables with specific approach to handle proxy
-process.env.N8N_USER_MANAGEMENT_DISABLED = 'false';  // Enable user management 
+// Set n8n to run in headless mode behind the scenes
+process.env.N8N_USER_MANAGEMENT_DISABLED = 'true';  // No user management needed
+process.env.N8N_DISABLE_UI = 'true';                // Disable UI/dashboard
+process.env.N8N_HEADLESS = 'true';                  // Run in headless mode
 process.env.N8N_METRICS = 'false';
 process.env.N8N_NPS_DISABLED = 'true';
 process.env.N8N_TELEMETRY_DISABLED = 'true';
 process.env.N8N_PERSONALIZATION_ENABLED = 'false';
 
-// Critical: Set trust proxy with timeout configuration to reduce validation issues
-process.env.N8N_TRUST_PROXY = 'true';
-process.env.N8N_PROXY_CACHE_TIMEOUT = '1000';
+// Minimal proxy configuration for Railway
+process.env.N8N_TRUST_PROXY = '1';
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 // Load environment variables after setting proxy
