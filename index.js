@@ -92,6 +92,10 @@ const startApplication = () => {
   // Explicitly set trust proxy environment variable to ensure proper handling of X-Forwarded-For headers
   process.env.N8N_TRUST_PROXY = 'true';
   process.env.N8N_ROOT_URL = process.env.WEBHOOK_URL || getBaseUrl(); // Ensure proper URL configuration
+  // Additional proxy settings to ensure Railway's load balancer is trusted
+  process.env.N8N_PROXY_HOST = process.env.RAILWAY_PUBLIC_HOST;
+  process.env.N8N_PROXY_PORT = process.env.PORT || '443';
+  process.env.N8N_PROXY_SSL = 'true';
   
   // Start n8n as a child process with UI enabled
   const n8nProcess = spawn('n8n', ['start'], {
