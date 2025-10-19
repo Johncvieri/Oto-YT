@@ -1,6 +1,6 @@
 {
   "deploy": {
-    "cmd": ["npm", "run", "start:railway"],
+    "cmd": ["npm", "run", "start"],
     "healthcheck": "/healthz",
     "sleepApplication": false
   },
@@ -9,10 +9,10 @@
     "nixpacksConfig": {
       "phases": {
         "install": {
-          "cmd": ["npm install --no-audit --no-fund --no-optional --legacy-peer-deps"]
+          "cmd": ["npm install --no-audit --no-fund --no-optional"]
         }
       },
-      "startCmd": "node index.js",
+      "startCmd": "npm start",
       "installNode": true,
       "installNpm": true
     }
@@ -82,5 +82,5 @@
       "required": true
     }
   },
-  "startCommand": "node index.js"
+  "startCommand": "npm run start"
 }
