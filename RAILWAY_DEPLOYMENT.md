@@ -66,7 +66,7 @@ The project includes a `railway.json` configuration file that sets up:
 
 ### 4. Deploy Your Application
 
-1. Railway will automatically detect the `Dockerfile` in your repository
+1. Railway will automatically build and deploy using nixpacks
 2. Click "Deploy Now" in the dashboard
 3. Wait for the build to complete (this may take several minutes)
 
@@ -94,7 +94,7 @@ If you have workflow files locally:
 
 ## Important Notes
 
-- **Build Time**: The first deployment may take 5-10 minutes as it builds the Docker image with ffmpeg and other dependencies
+- **Build Time**: The first deployment may take 5-10 minutes as it installs dependencies with ffmpeg and other requirements
 - **Resource Usage**: The app is configured to use 1-2GB RAM due to the video processing requirements, but optimized to run only once daily per account to minimize resource consumption
 - **Storage**: Railway ephemeral storage is limited, so consider using Supabase for persistent data
 - **Process Limits**: Railway free tier has request timeout limits; the daily schedule helps manage these limitations effectively
@@ -103,7 +103,7 @@ If you have workflow files locally:
 
 ### Common Issues:
 
-1. **"n8n command not found"**: The Dockerfile should install n8n properly, but if experiencing issues, check the build logs.
+1. **"n8n command not found"**: The nixpacks build process should install n8n properly, but if experiencing issues, check the build logs.
 
 2. **Environment variables not loaded**: Make sure all required variables are set in the Railway dashboard under "Variables".
 

@@ -74,7 +74,7 @@ The GitHub Actions workflow includes steps that use the GitHub API to communicat
 
 The system includes a CI/CD workflow in `.github/workflows/ci-cd.yml` that:
 1. Runs tests on multiple Node.js versions
-2. Builds and tests Docker containers
+2. Builds and tests on Railway nixpacks
 3. Integrates with Supabase and Gemini using GitHub API
 4. Deploys to production when main branch is updated
 

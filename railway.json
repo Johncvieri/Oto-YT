@@ -1,6 +1,6 @@
 {
   "deploy": {
-    "cmd": ["npm", "run", "start"],
+    "cmd": ["npm", "run", "start:railway"],
     "healthcheck": "/healthz",
     "sleepApplication": false
   },
@@ -12,7 +12,7 @@
           "cmd": ["npm install --no-audit --no-fund --no-optional --legacy-peer-deps"]
         }
       },
-      "startCmd": "npm run start",
+      "startCmd": "node index.js",
       "installNode": true,
       "installNpm": true
     }
@@ -82,5 +82,5 @@
       "required": true
     }
   },
-  "startCommand": "npm run start"
+  "startCommand": "node index.js"
 }

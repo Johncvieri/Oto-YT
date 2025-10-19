@@ -8,7 +8,7 @@ The YouTube Automation System now includes comprehensive GitHub integration for 
 ### 1. Automated Deployments
 - **GitHub Actions Workflow** (.github/workflows/ci-cd.yml) with CI/CD pipeline
 - Automated testing on code changes
-- Docker build and testing
+- Build and testing on Railway nixpacks
 - Production deployment on main branch updates
 - Multi-environment support (development, staging, production)
 

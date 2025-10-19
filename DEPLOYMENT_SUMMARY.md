@@ -30,14 +30,14 @@ This YouTube automation system is optimized for:
 - FFmpeg integration for video processing
 - Supabase database for analytics and tracking
 - Telegram notifications for status updates
-- Docker containerization for easy deployment
+- Railway nixpacks deployment for easy setup
 - Railway-optimized configuration
 
 ## Deployment Information
 
 ### Files Included:
 - All 3 workflow files with daily scheduling (`0 12 * * *`)
-- Docker configuration for containerization
+- Railway configuration for deployment
 - Railway deployment configuration
 - Asset templates for video processing
 - Documentation files for setup and usage

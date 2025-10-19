@@ -11,14 +11,6 @@ Easiest way to get started with a one-click deployment:
 
 For detailed Railway deployment instructions, see [RAILWAY_DEPLOYMENT.md](./RAILWAY_DEPLOYMENT.md)
 
-### Docker Deployment
-Build and run locally or on any container platform:
-
-```bash
-docker build -t youtube-automation .
-docker run -p 5678:5678 -e GEMINI_API_KEY=your_key -e SUPABASE_URL=your_url -e SUPABASE_KEY=your_key youtube-automation
-```
-
 ### Local Installation
 1. Clone the repository
 2. Install dependencies: `npm install`
