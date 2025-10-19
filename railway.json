@@ -16,7 +16,7 @@
     }
   },
   "deploy": {
-    "cmd": ["npm", "start"],
+    "cmd": ["sh", "-c", "node import-workflows.js && npm start"],
     "healthcheck": "/healthz",
     "sleepApplication": false
   },
@@ -34,7 +34,7 @@
   },
   "variables": {
     "GEMINI_API_KEY": { "required": true },
-    "SUPABASE_URL": { "required": "true" },
+    "SUPABASE_URL": { "required": true },
     "SUPABASE_KEY": { "required": true },
     "YOUTUBE_API_1": { "required": true },
     "YOUTUBE_CHANNEL_1": { "required": true },
