@@ -4,7 +4,7 @@
     "nixpacksConfig": {
       "phases": {
         "install": {
-          "cmd": ["npm ci --legacy-peer-deps --no-audit --no-fund"]
+          "cmd": ["npm ci --no-audit --no-fund"]
         },
         "build": {
           "cmd": ["echo 'Build completed'"]
@@ -16,35 +16,14 @@
     }
   },
   "deploy": {
-    "cmd": ["sh", "-c", "node verify-env.js && node seed-supabase.js && node import-workflows.js && npm start"],
-    "healthcheck": "/healthz",
+    "cmd": ["npm start"],
+    "healthcheck": "/health",
     "sleepApplication": false
   },
   "env": {
     "NODE_ENV": { "value": "production", "type": "string" },
-    "PORT": { "value": "8080", "type": "string" },
-    "TZ": { "value": "Asia/Jakarta", "type": "string" },
-    "N8N_BASIC_AUTH_ACTIVE": { "value": "false", "type": "string" },
-    "N8N_SECURE_COOKIE": { "value": "false", "type": "string" },
-    "N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS": { "value": "false", "type": "string" },
-    "N8N_PERSONALIZATION_ENABLED": { "value": "false", "type": "string" },
-    "N8N_HEALTH_CHECKER": { "value": "true", "type": "string" },
-    "N8N_TRUST_PROXY": { "value": "true", "type": "string" },
-    "NIXPACKS_NODE_PRUNE": { "value": "true", "type": "string" },
-    "NPM_CONFIG_PRODUCTION": { "value": "false", "type": "string" }
+    "PORT": { "value": "8080", "type": "string" }
   },
   "variables": {
-    "GEMINI_API_KEY": { "required": true },
-    "SUPABASE_URL": { "required": true },
-    "SUPABASE_ANON_KEY": { "required": true },
-    "SUPABASE_SERVICE_ROLE_KEY": { "required": true },
-    "YOUTUBE_API_1": { "required": true },
-    "YOUTUBE_CHANNEL_1": { "required": true },
-    "YOUTUBE_API_2": { "required": true },
-    "YOUTUBE_CHANNEL_2": { "required": true },
-    "YOUTUBE_API_3": { "required": true },
-    "YOUTUBE_CHANNEL_3": { "required": true },
-    "TELEGRAM_API_KEY": { "required": true },
-    "TELEGRAM_CHAT_ID": { "required": true }
   }
 }
