@@ -35,9 +35,6 @@ WORKDIR /app
 # Copy production dependencies
 COPY --from=builder /app/node_modules ./node_modules
 
-# Install n8n directly without global installation to avoid CLI issues
-RUN npm install -g n8n@latest
-
 # Set up PATH
 ENV PATH="/usr/local/bin:/usr/local/lib/node_modules/.bin:${PATH}"
 
