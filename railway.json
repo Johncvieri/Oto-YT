@@ -1,7 +1,16 @@
 {
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "echo 'Build completed'",
+    "nixpacksConfig": {
+      "phases": {
+        "install": {
+          "cmd": ["npm ci --legacy-peer-deps --no-audit --no-fund"]
+        },
+        "build": {
+          "cmd": ["echo 'Build completed'"]
+        }
+      }
+    },
     "cache": {
       "paths": ["node_modules"]
     }
@@ -19,11 +28,13 @@
     "N8N_SECURE_COOKIE": { "value": "false", "type": "string" },
     "N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS": { "value": "false", "type": "string" },
     "N8N_PERSONALIZATION_ENABLED": { "value": "false", "type": "string" },
-    "N8N_HEALTH_CHECKER": { "value": "true", "type": "string" }
+    "N8N_HEALTH_CHECKER": { "value": "true", "type": "string" },
+    "NIXPACKS_NODE_PRUNE": { "value": "true", "type": "string" },
+    "NPM_CONFIG_PRODUCTION": { "value": "false", "type": "string" }
   },
   "variables": {
     "GEMINI_API_KEY": { "required": true },
-    "SUPABASE_URL": { "required": true },
+    "SUPABASE_URL": { "required": "true" },
     "SUPABASE_KEY": { "required": true },
     "YOUTUBE_API_1": { "required": true },
     "YOUTUBE_CHANNEL_1": { "required": true },
