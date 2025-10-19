@@ -17,7 +17,8 @@ const N8N_DEFAULTS = {
   SECURE_COOKIE: 'false',
   ENFORCE_SETTINGS_FILE_PERMISSIONS: 'false',
   PERSONALIZATION_ENABLED: 'false',
-  HEALTH_CHECKER: 'true'
+  HEALTH_CHECKER: 'true',
+  TRUST_PROXY: 'true'
 };
 
 // --- Environment Configuration ---
@@ -31,6 +32,7 @@ process.env.N8N_SECURE_COOKIE = process.env.N8N_SECURE_COOKIE || N8N_DEFAULTS.SE
 process.env.N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS = process.env.N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS || N8N_DEFAULTS.ENFORCE_SETTINGS_FILE_PERMISSIONS;
 process.env.N8N_PERSONALIZATION_ENABLED = process.env.N8N_PERSONALIZATION_ENABLED || N8N_DEFAULTS.PERSONALIZATION_ENABLED;
 process.env.N8N_HEALTH_CHECKER = N8N_DEFAULTS.HEALTH_CHECKER;
+process.env.N8N_TRUST_PROXY = process.env.N8N_TRUST_PROXY || N8N_DEFAULTS.TRUST_PROXY;
 
 // Determine the base URL based on environment
 const getBaseUrl = () => {
@@ -65,6 +67,7 @@ const startApplication = () => {
   console.log(`  - Port: ${process.env.N8N_PORT}`);
   console.log(`  - Basic Auth: ${process.env.N8N_BASIC_AUTH_ACTIVE}`);
   console.log(`  - Health Checker: ${process.env.N8N_HEALTH_CHECKER}`);
+  console.log(`  - Trust Proxy: ${process.env.N8N_TRUST_PROXY}`);
   console.log(`  - Webhook URL: ${process.env.WEBHOOK_URL}`);
   console.log('');
 

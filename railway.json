@@ -29,6 +29,7 @@
     "N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS": { "value": "false", "type": "string" },
     "N8N_PERSONALIZATION_ENABLED": { "value": "false", "type": "string" },
     "N8N_HEALTH_CHECKER": { "value": "true", "type": "string" },
+    "N8N_TRUST_PROXY": { "value": "true", "type": "string" },
     "NIXPACKS_NODE_PRUNE": { "value": "true", "type": "string" },
     "NPM_CONFIG_PRODUCTION": { "value": "false", "type": "string" }
   },
