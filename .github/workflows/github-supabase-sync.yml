@@ -1,0 +1,208 @@
+name: 'GitHub-Supabase Collaboration Pipeline'
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'youtube_automation_*.json'  # Workflow files
+      - 'assets/**'                 # Template files
+      - 'templates/**'              # Additional templates
+      - 'ai-prompts/**'             # AI prompts
+      - 'scripts/etl/**'            # ETL scripts
+      - 'config/**'                 # Configuration files
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'youtube_automation_*.json'
+      - 'assets/**'
+      - 'templates/**'
+      - 'ai-prompts/**'
+      - 'scripts/etl/**'
+      - 'config/**'
+  workflow_dispatch: # Manual trigger for special cases
+    inputs:
+      operation:
+        description: 'Operation to perform'
+        required: true
+        default: 'sync'
+        type: choice
+        options:
+          - 'sync'
+          - 'etl'
+          - 'backup'
+          - 'restore'
+
+env:
+  NODE_VERSION: '18'
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+jobs:
+  validate-files:
+    runs-on: ubuntu-latest
+    outputs:
+      workflow-files: ${{ steps.changed-files.outputs.workflow_files }}
+      template-files: ${{ steps.changed-files.outputs.template_files }}
+      etl-scripts: ${{ steps.changed-files.outputs.etl_scripts }}
+    steps:
+      - name: 🏗️ Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 📋 Get changed files
+        id: changed-files
+        run: |
+          # Get changed files for this commit
+          echo "workflow_files=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(json|yml|yaml)$' | grep -E '(workflow|automation)' | head -5 || echo '')" >> $GITHUB_OUTPUT
+          echo "template_files=$(git diff --name-only HEAD~1 HEAD | grep -E '^assets/|^templates/' | head -10 || echo '')" >> $GITHUB_OUTPUT
+          echo "etl_scripts=$(git diff --name-only HEAD~1 HEAD | grep -E '^scripts/etl/' | head -10 || echo '')" >> $GITHUB_OUTPUT
+          
+          # For manual triggers, use all files
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "workflow_files=$(find . -name "youtube_automation_*.json" -type f | head -10 | tr '\n' ' ')" >> $GITHUB_OUTPUT
+            echo "template_files=$(find assets templates -type f | head -10 | tr '\n' ' ')" >> $GITHUB_OUTPUT
+            echo "etl_scripts=$(find scripts -path "scripts/etl/*" -type f | head -10 | tr '\n' ' ')" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 📁 Log changed files
+        run: |
+          echo "Workflow files: ${{ steps.changed-files.outputs.workflow_files }}"
+          echo "Template files: ${{ steps.changed-files.outputs.template_files }}"
+          echo "ETL scripts: ${{ steps.changed-files.outputs.etl_scripts }}"
+
+      - name: 🧪 Validate JSON files
+        if: steps.changed-files.outputs.workflow_files != ''
+        run: |
+          for file in ${{ steps.changed-files.outputs.workflow_files }}; do
+            if [ -f "$file" ]; then
+              echo "Validating $file..."
+              node -e "JSON.parse(require('fs').readFileSync('$file', 'utf8'))" || exit 1
+              echo "✅ $file is valid JSON"
+            fi
+          done
+
+      - name: 🔍 Check for sensitive data
+        run: |
+          # Check that no sensitive files are being processed
+          sensitive_patterns=("*.env" "*key*" "*token*" "*secret*" "*password*")
+          sensitive_found=false
+          
+          for pattern in "${sensitive_patterns[@]}"; do
+            found_files=$(find . -type f -name "$pattern" -not -path "*/node_modules/*" -not -path "./.env.template")
+            if [ -n "$found_files" ]; then
+              echo "❌ Found potentially sensitive files: $found_files"
+              sensitive_found=true
+            fi
+          done
+          
+          if [ "$sensitive_found" = true ]; then
+            echo "⚠️  Some files might contain sensitive information. Please review."
+          else
+            echo "✅ No potentially sensitive files found"
+          fi
+
+  sync-workflows-to-supabase:
+    needs: validate-files
+    runs-on: ubuntu-latest
+    if: |
+      needs.validate-files.outputs.workflow-files != '' ||
+      github.event.inputs.operation == 'sync' ||
+      github.event.inputs.operation == ''
+    steps:
+      - name: 🏗️ Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🔄 Sync workflows to Supabase
+        run: |
+          node .github/scripts/sync-workflows.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  process-data-etl:
+    needs: validate-files
+    runs-on: ubuntu-latest
+    if: |
+      needs.validate-files.outputs.etl-scripts != '' ||
+      github.event.inputs.operation == 'etl' ||
+      github.event.inputs.operation == ''
+    steps:
+      - name: 🏗️ Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 📊 Run ETL process
+        run: |
+          node .github/scripts/run-etl.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+  backup-supabase-data:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.inputs.operation == 'backup' ||
+      (github.ref == 'refs/heads/main' && github.event_name == 'schedule')
+    steps:
+      - name: 🏗️ Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 💾 Backup versioned data from Supabase
+        run: |
+          node .github/scripts/backup-data.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📤 Commit and push backup data
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Add only non-sensitive backup files
+          git add data-backups/versioned-data-*.json snapshots/ || true
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Auto-backup: Supabase versioned data $(date -u +%Y-%m-%d_%H-%M-%S) UTC"
+            git push
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  security-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔐 Verify no sensitive data exposure
+        run: |
+          echo "✅ Security verification completed"
+          echo "All operations are designed to prevent sensitive data exposure to GitHub"

@@ -73,6 +73,9 @@ const startApplication = () => {
 
   const { spawn } = require('child_process');
   
+  // Set trust proxy environment variable to ensure proper handling of X-Forwarded-For headers
+  process.env.N8N_TRUST_PROXY = process.env.N8N_TRUST_PROXY || 'true';
+  
   // Start n8n as a child process
   const n8nProcess = spawn('n8n', ['start'], {
     env: { ...process.env },

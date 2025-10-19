@@ -1,5 +1,27 @@
 # Dependencies
-node_modules/
+node_modules
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Runtime files
+*.log
+*.tmp
+temp/
+upload/
+
+# Database files
+*.db
+*.sqlite
+
+# Sensitive data
+**/sensitive_data/
+**/private_data/
+
+# Raw/unsanitized backup files
+data-backups/raw-*.json
+**/sensitive-backup-*.json/
 
 # Environment variables
 .env
