@@ -1,0 +1,16 @@
+{
+  "userManagement": {
+    "isInstanceOwnerSetUp": true,
+    "emails": {
+      "smtp": {
+        "enabled": false
+      }
+    }
+  },
+  "templates": {
+    "enabled": false
+  },
+  "publicApi": {
+    "enabled": false
+  }
+}
