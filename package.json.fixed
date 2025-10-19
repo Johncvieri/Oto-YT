@@ -1,0 +1,32 @@
+{
+  "name": "railway-express-rate-limit-fixed",
+  "version": "1.0.0",
+  "description": "Express application with rate limiting fixed for Railway deployment",
+  "main": "express-railway-fixed.js",
+  "scripts": {
+    "start": "node express-railway-fixed.js",
+    "dev": "NODE_ENV=development nodemon express-railway-fixed.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "helmet": "^6.1.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "express",
+    "rate-limit",
+    "railway",
+    "x-forwarded-for",
+    "proxy",
+    "security"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

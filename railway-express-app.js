@@ -31,7 +31,8 @@ const limiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  // Override the method to trust the proxy header
+  // Explicitly enable trustProxy to handle Railway's load balancer
+  trustProxy: true,
   skipSuccessfulRequests: false,
   skipFailedRequests: false,
 });
