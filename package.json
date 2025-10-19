@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "test": "node test.js",
-    "test:gemini": "node gemini-test.js",
     "test:prod": "NODE_ENV=production node test.js",
     "start": "node index.js",
     "dev": "node index.js",

@@ -13,7 +13,7 @@
   },
   "env": {
     "N8N_BASIC_AUTH_ACTIVE": {
-      "value": "true",
+      "value": "false",
       "type": "string"
     },
     "N8N_SECURE_COOKIE": {
@@ -34,6 +34,10 @@
     },
     "N8N_PERSONALIZATION_ENABLED": {
       "value": "false",
+      "type": "string"
+    },
+    "N8N_HEALTH_CHECKER": {
+      "value": "true",
       "type": "string"
     }
   },
