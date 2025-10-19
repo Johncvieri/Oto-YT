@@ -7,11 +7,10 @@
     "test": "node test.js",
     "test:gemini": "node gemini-test.js",
     "test:prod": "NODE_ENV=production node test.js",
-    "start": "N8N_HOST=0.0.0.0 N8N_PORT=$PORT N8N_BASIC_AUTH_ACTIVE=true N8N_SECURE_COOKIE=false N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false N8N_PERSONALIZATION_ENABLED=false n8n start",
-    "start:n8n": "n8n start",
-    "deploy": "echo 'Deploy to hosting platform: npm install && n8n import:credentials --secrets .env && n8n'",
-
-    "deploy:railway": "echo 'Preparing for Railway deployment' && npm install && npx n8n import:credentials --input=credentials.json 2>/dev/null || echo 'Credentials import skipped' && n8n",
+    "start": "node index.js",
+    "dev": "node index.js",
+    "n8n": "n8n start",
+    "deploy": "echo 'Deploy to hosting platform: npm install'",
     "health": "node test.js",
     "github:setup": "node github-setup.js",
     "github:sync-config": "echo 'Syncing configuration to GitHub repository'",
@@ -21,6 +20,7 @@
     "github:sync-services": "echo 'Syncing with Supabase and Gemini services via GitHub API'"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "@supabase/supabase-js": "^2.75.1",
     "dotenv": "^16.6.1",
     "fast-xml-parser": "^4.2.5",
@@ -28,7 +28,6 @@
     "fluent-ffmpeg": "^2.1.3",
     "google-tts-api": "^2.0.2",
     "node-fetch": "^3.3.2",
-    "@google/generative-ai": "^0.21.0",
     "n8n": "^1.115.3"
   },
   "engines": {

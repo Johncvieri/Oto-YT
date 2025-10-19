@@ -5,7 +5,11 @@
     "sleepApplication": false
   },
   "build": {
-    "builder": "dockerfile"
+    "builder": "nixpacks",
+    "nixpacksConfig": {
+      "installNode": true,
+      "installNpm": true
+    }
   },
   "env": {
     "N8N_BASIC_AUTH_ACTIVE": {
