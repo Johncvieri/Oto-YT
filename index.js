@@ -5,7 +5,14 @@
  * with AI-powered enhancements for YouTube content automation.
  */
 
-// Load environment variables
+// Set critical proxy environment variables BEFORE loading other modules
+process.env.N8N_TRUST_PROXY = 'true';
+process.env.N8N_USER_MANAGEMENT_DISABLED = 'true';
+process.env.N8N_METRICS = 'false';
+process.env.N8N_NPS_DISABLED = 'true';
+process.env.N8N_TELEMETRY_DISABLED = 'true';
+
+// Load environment variables after setting proxy
 require('dotenv').config();
 const path = require('path');
 

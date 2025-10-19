@@ -6,7 +6,7 @@
   "scripts": {
     "test": "node test.js",
     "test:prod": "NODE_ENV=production node test.js",
-    "start": "node bootstrap.js",
+    "start": "node index.js",
     "start:with-workflows": "node import-workflows.js && node index.js",
     "dev": "node index.js",
     "n8n": "n8n start",
