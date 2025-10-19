@@ -7,6 +7,12 @@
   "build": {
     "builder": "nixpacks",
     "nixpacksConfig": {
+      "phases": {
+        "install": {
+          "cmd": ["npm install --no-audit --no-fund --no-optional --legacy-peer-deps"]
+        }
+      },
+      "startCmd": "npm run start",
       "installNode": true,
       "installNpm": true
     }

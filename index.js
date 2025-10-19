@@ -9,7 +9,7 @@
 require('dotenv').config();
 
 // --- Constants Definitions ---
-const DEFAULT_PORT = 5678;
+const DEFAULT_PORT = process.env.PORT || 5678;
 const REQUIRED_ENV_VARS = ['GEMINI_API_KEY', 'SUPABASE_URL', 'SUPABASE_ANON_KEY'];
 const N8N_DEFAULTS = {
   HOST: '0.0.0.0',
@@ -21,7 +21,7 @@ const N8N_DEFAULTS = {
 };
 
 // --- Environment Configuration ---
-const port = process.env.PORT || DEFAULT_PORT;
+const port = parseInt(DEFAULT_PORT);
 
 // Configure n8n environment variables for Railway deployment
 process.env.N8N_HOST = process.env.N8N_HOST || N8N_DEFAULTS.HOST;
@@ -31,7 +31,18 @@ process.env.N8N_SECURE_COOKIE = process.env.N8N_SECURE_COOKIE || N8N_DEFAULTS.SE
 process.env.N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS = process.env.N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS || N8N_DEFAULTS.ENFORCE_SETTINGS_FILE_PERMISSIONS;
 process.env.N8N_PERSONALIZATION_ENABLED = process.env.N8N_PERSONALIZATION_ENABLED || N8N_DEFAULTS.PERSONALIZATION_ENABLED;
 process.env.N8N_HEALTH_CHECKER = N8N_DEFAULTS.HEALTH_CHECKER;
-process.env.WEBHOOK_URL = process.env.WEBHOOK_URL || `https://${process.env.RAILWAY_PUBLIC_HOST || 'localhost:' + port}`;
+
+// Determine the base URL based on environment
+const getBaseUrl = () => {
+  if (process.env.RAILWAY_PUBLIC_HOST) {
+    return `https://${process.env.RAILWAY_PUBLIC_HOST}`;
+  } else if (process.env.HEROKU_APP_NAME) {
+    return `https://${process.env.HEROKU_APP_NAME}.herokuapp.com`;
+  }
+  return `http://localhost:${port}`;
+};
+
+process.env.WEBHOOK_URL = process.env.WEBHOOK_URL || getBaseUrl();
 
 // --- Environment Validation ---
 const validateEnvironment = () => {
@@ -40,7 +51,7 @@ const validateEnvironment = () => {
   if (missingEnvVars.length > 0) {
     console.warn('Warning: The following environment variables are missing:');
     missingEnvVars.forEach(envVar => console.warn(`  - ${envVar}`));
-    console.log('Please set these in your .env file or environment configuration.');
+    console.log('Please set these in your Railway environment variables.');
     console.log('');
   }
 };
@@ -54,6 +65,7 @@ const startApplication = () => {
   console.log(`  - Port: ${process.env.N8N_PORT}`);
   console.log(`  - Basic Auth: ${process.env.N8N_BASIC_AUTH_ACTIVE}`);
   console.log(`  - Health Checker: ${process.env.N8N_HEALTH_CHECKER}`);
+  console.log(`  - Webhook URL: ${process.env.WEBHOOK_URL}`);
   console.log('');
 
   const { spawn } = require('child_process');
@@ -66,6 +78,7 @@ const startApplication = () => {
 
   n8nProcess.on('error', (err) => {
     console.error('Failed to start n8n:', err.message);
+    console.error('Make sure n8n is properly installed as a dependency.');
   });
 
   n8nProcess.on('close', (code) => {
