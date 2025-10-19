@@ -1,7 +1,7 @@
 {
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "npm ci --legacy-peer-deps || npm install --legacy-peer-deps",
+    "buildCommand": "echo 'Build completed'",
     "cache": {
       "paths": ["node_modules"]
     }

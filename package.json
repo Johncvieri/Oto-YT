@@ -7,7 +7,6 @@
     "test": "node test.js",
     "test:prod": "NODE_ENV=production node test.js",
     "start": "node index.js",
-    "start:railway": "node index.js",
     "dev": "node index.js",
     "n8n": "n8n start",
     "deploy": "echo 'Deploy to hosting platform: npm install'",
