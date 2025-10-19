@@ -34,6 +34,13 @@ process.env.N8N_PERSONALIZATION_ENABLED = process.env.N8N_PERSONALIZATION_ENABLE
 process.env.N8N_HEALTH_CHECKER = N8N_DEFAULTS.HEALTH_CHECKER;
 process.env.N8N_TRUST_PROXY = process.env.N8N_TRUST_PROXY || N8N_DEFAULTS.TRUST_PROXY;
 
+// Additional settings for UI/dashboard accessibility
+process.env.N8N_DIAGNOSTICS_ENABLED = process.env.N8N_DIAGNOSTICS_ENABLED || 'true';
+process.env.N8N_PUBLIC_API_DISABLED = process.env.N8N_PUBLIC_API_DISABLED || 'false';
+process.env.N8N_VERSION_NOTIFICATIONS_ENABLED = process.env.N8N_VERSION_NOTIFICATIONS_ENABLED || 'true';
+// Set execution mode for proper dashboard functionality
+process.env.N8N_EXECUTIONS_MODE = process.env.N8N_EXECUTIONS_MODE || 'regular';
+
 // Determine the base URL based on environment
 const getBaseUrl = () => {
   if (process.env.RAILWAY_PUBLIC_HOST) {
@@ -73,10 +80,11 @@ const startApplication = () => {
 
   const { spawn } = require('child_process');
   
-  // Set trust proxy environment variable to ensure proper handling of X-Forwarded-For headers
-  process.env.N8N_TRUST_PROXY = process.env.N8N_TRUST_PROXY || 'true';
+  // Explicitly set trust proxy environment variable to ensure proper handling of X-Forwarded-For headers
+  process.env.N8N_TRUST_PROXY = 'true';
+  process.env.N8N_ROOT_URL = process.env.WEBHOOK_URL || getBaseUrl(); // Ensure proper URL configuration
   
-  // Start n8n as a child process
+  // Start n8n as a child process with UI enabled
   const n8nProcess = spawn('n8n', ['start'], {
     env: { ...process.env },
     stdio: 'inherit' // This ensures n8n's output goes directly to parent
