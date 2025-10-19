@@ -16,6 +16,8 @@
     "verify-all": "node verify-all-fixes.js",
     "test-pipeline": "node test-pipeline.js",
     "setup-complete": "node verify-env.js && node seed-supabase.js && node import-workflows.js",
+    "monitor": "node workflow-monitor.js",
+    "monitor:status": "node -e \"require('./workflow-monitor.js').runMonitoring().then(console.log).catch(console.error);\""
     "deploy": "echo 'Deploy to hosting platform: npm install'",
     "health": "node test.js",
     "github:setup": "node github-setup.js",
