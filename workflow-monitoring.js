@@ -1,13 +1,14 @@
 /**
- * Enhanced Workflow Status Monitor
+ * Advanced Workflow Monitoring for YouTube Automation System
  * 
- * Updated script to check workflow status using n8n API and generate reports
+ * This script provides real-time monitoring of workflow status,
+ * execution tracking, and health reporting.
  */
 
 const { createClient } = require('@supabase/supabase-js');
 const axios = require('axios');
 
-class EnhancedWorkflowMonitor {
+class WorkflowMonitor {
   constructor() {
     this.supabase = createClient(
       process.env.SUPABASE_URL,
@@ -18,6 +19,8 @@ class EnhancedWorkflowMonitor {
       username: process.env.N8N_BASIC_AUTH_USER,
       password: process.env.N8N_BASIC_AUTH_PASSWORD
     };
+    this.monitorInterval = 300000; // 5 minutes
+    this.intervals = {};
   }
 
   /**
@@ -93,7 +96,7 @@ class EnhancedWorkflowMonitor {
         .limit(10);
 
       if (error) {
-        // If table doesn't exist, return appropriate message
+        // If table doesn't exist, create it or return message
         if (error.code === '42P01') { // undefined table
           return {
             exists: false,
@@ -118,79 +121,127 @@ class EnhancedWorkflowMonitor {
   }
 
   /**
+   * Check system health
+   */
+  async checkSystemHealth() {
+    try {
+      const healthResponse = await axios.get(`${this.n8nUrl}/healthz`, {
+        timeout: 10000
+      });
+
+      return {
+        success: true,
+        health: healthResponse.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Health check error: ${error.message}`
+      };
+    }
+  }
+
+  /**
    * Generate comprehensive status report
    */
-  async runMonitoring() {
-    console.log('🔍 Running enhanced workflow monitoring...');
+  async generateStatusReport() {
+    console.log('🔍 Generating comprehensive status report...');
     
     const [
       executions,
       definitions,
-      dbStatus
+      dbStatus,
+      health
     ] = await Promise.all([
       this.checkWorkflowExecutions(),
       this.checkWorkflowDefinitions(),
-      this.getWorkflowStatusFromDB()
+      this.getWorkflowStatusFromDB(),
+      this.checkSystemHealth()
     ]);
 
     const report = {
       timestamp: new Date().toISOString(),
       n8n: {
         executions,
-        definitions
+        definitions,
+        health
       },
       database: dbStatus,
       summary: {
-        n8n_status: 'available',
+        n8n_status: health.success ? health.health.overall : 'unavailable',
         workflow_count: definitions.success ? definitions.count : 0,
         recent_executions: executions.success ? executions.count : 0,
         db_monitoring: dbStatus.exists
       }
     };
 
-    console.log('📊 Enhanced Status Report:');
+    console.log('📊 Status Report Generated:');
+    console.log(`   Overall Status: ${report.summary.n8n_status}`);
     console.log(`   Workflows Configured: ${report.summary.workflow_count}`);
     console.log(`   Recent Executions: ${report.summary.recent_executions}`);
     console.log(`   DB Monitoring: ${report.summary.db_monitoring ? 'Enabled' : 'Disabled'}`);
     
-    if (executions.success) {
-      console.log('✅ n8n executions API accessible');
-    } else {
-      console.log(`❌ n8n executions API: ${executions.error}`);
-    }
-    
-    if (definitions.success) {
-      console.log('✅ n8n workflows API accessible');
-    } else {
-      console.log(`❌ n8n workflows API: ${definitions.error}`);
-    }
-    
-    if (dbStatus.success) {
-      console.log('✅ Database monitoring active');
-    } else {
-      console.log(`❌ Database monitoring: ${dbStatus.error || dbStatus.message}`);
-    }
-
     return report;
+  }
+
+  /**
+   * Continuous monitoring
+   */
+  startMonitoring() {
+    console.log('🔄 Starting continuous workflow monitoring...');
+    
+    // Initial status check
+    this.generateStatusReport();
+    
+    // Set up periodic monitoring
+    this.intervals.statusCheck = setInterval(() => {
+      this.generateStatusReport().catch(error => {
+        console.error('❌ Error in monitoring cycle:', error);
+      });
+    }, this.monitorInterval);
+
+    // Monitor for shutdown signals
+    process.on('SIGTERM', () => {
+      this.stopMonitoring();
+    });
+
+    process.on('SIGINT', () => {
+      this.stopMonitoring();
+    });
+  }
+
+  /**
+   * Stop monitoring
+   */
+  stopMonitoring() {
+    console.log('🛑 Stopping workflow monitoring...');
+    
+    Object.keys(this.intervals).forEach(key => {
+      if (this.intervals[key]) {
+        clearInterval(this.intervals[key]);
+      }
+    });
+    
+    console.log('✅ Monitoring stopped');
   }
 }
 
-// Create instance and provide functions for backward compatibility
-const monitor = new EnhancedWorkflowMonitor();
-
-// Run if executed directly
+// Initialize and start monitoring if run directly
 if (require.main === module) {
-  monitor.runMonitoring()
-    .then(result => {
-      console.log('🎯 Enhanced monitoring completed');
-    })
-    .catch(error => {
-      console.error('❌ Enhanced monitoring failed:', error);
-    });
+  // Check if required environment variables are available
+  if (!process.env.N8N_BASIC_AUTH_USER || !process.env.N8N_BASIC_AUTH_PASSWORD) {
+    console.error('❌ Missing required environment variables for n8n authentication');
+    console.error('   Please set N8N_BASIC_AUTH_USER and N8N_BASIC_AUTH_PASSWORD');
+    process.exit(1);
+  }
+
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('❌ Missing required Supabase environment variables');
+    process.exit(1);
+  }
+
+  const monitor = new WorkflowMonitor();
+  monitor.startMonitoring();
 }
 
-module.exports = { 
-  runMonitoring: () => monitor.runMonitoring(),
-  checkWorkflowStatus: () => monitor.runMonitoring(),
-  generateDailyReport: () => monitor.runMonitoring() // Simplified for compatibility
-};
+module.exports = WorkflowMonitor;

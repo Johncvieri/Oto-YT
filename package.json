@@ -1,37 +1,32 @@
 {
   "name": "youtube-automation",
   "version": "1.0.0",
-  "description": "YouTube Shorts automation system that creates, uploads, and analyzes videos with GitHub API integration for enhanced Supabase and Gemini collaboration",
+  "description": "YouTube Shorts automation system with enhanced monitoring capabilities",
   "main": "index.js",
   "scripts": {
     "test": "node test.js",
     "test:prod": "NODE_ENV=production node test.js",
-    "start": "node index.js",
-    "start:with-workflows": "node import-workflows.js && node index.js",
+    "start": "node start-monitoring.js",
+    "start:with-workflows": "node import-workflows.js && node start-monitoring.js",
     "dev": "node index.js",
     "n8n": "n8n start",
     "import-workflows": "node import-workflows.js",
     "seed-supabase": "node seed-supabase.js",
     "verify-env": "node verify-env.js",
-    "verify-all": "node verify-all-fixes.js",
-    "test-pipeline": "node test-pipeline.js",
-    "setup-complete": "node verify-env.js && node seed-supabase.js && node import-workflows.js",
-    "monitor": "node workflow-monitor.js",
-    "monitor:status": "node -e \"require('./workflow-monitor.js').runMonitoring().then(console.log).catch(console.error);\""
-    "deploy": "echo 'Deploy to hosting platform: npm install'",
     "health": "node test.js",
+    "monitor": "node workflow-monitoring.js",
+    "monitor:continuous": "node workflow-monitoring.js",
+    "status": "node -e \"fetch('http://localhost:' + (process.env.PORT || 5678) + '/healthz').then(r => r.json()).then(console.log).catch(console.error);\"",
     "github:setup": "node github-setup.js",
-    "github:sync-config": "echo 'Syncing configuration to GitHub repository'",
-    "github:backup": "git add . && git commit -m \"Backup: System configuration\" && git push origin main",
-    "github:version": "echo Creating new version tag && git tag -a v$(date '+%Y.%m.%d') -m \"Auto-generated release\" && git push origin v$(date '+%Y.%m.%d')",
-    "github:init": "node github-setup.js",
-    "github:sync-services": "echo 'Syncing with Supabase and Gemini services via GitHub API'"
+    "setup-complete": "node verify-env.js && node seed-supabase.js && node import-workflows.js && node start-monitoring.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
     "@supabase/supabase-js": "^2.75.1",
     "ajv": "^8.12.0",
+    "axios": "^1.6.0",
     "dotenv": "^16.6.1",
+    "express": "^4.18.2",
     "fast-xml-parser": "^4.2.5",
     "ffmpeg-static": "^5.2.0",
     "fluent-ffmpeg": "^2.1.3",
@@ -51,6 +46,7 @@
     "ai",
     "supabase",
     "github",
-    "gemini"
+    "gemini",
+    "monitoring"
   ]
 }
