@@ -1,13 +1,18 @@
 /**
- * Import n8n workflows script
+ * Import n8n workflows by copying to default n8n workflow directory
  * 
- * This script imports workflow files into n8n before starting the main application.
+ * This script copies workflow files to n8n's default workflow directory
+ * so they are automatically loaded when n8n starts.
  */
 
-const { spawn, execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { promisify } = require('util');
 require('dotenv').config();
+
+const access = promisify(fs.access);
+const mkdir = promisify(fs.mkdir);
+const copyFile = promisify(fs.copyFile);
 
 const WORKFLOW_FILES = [
   'youtube_automation_source.json',
@@ -15,74 +20,63 @@ const WORKFLOW_FILES = [
   'youtube_automation_trend.json'
 ];
 
-const importWorkflows = async () => {
-  console.log('🔄 Starting workflow import process...');
+async function ensureWorkflowDirectory() {
+  // n8n default workflow directory
+  const workflowDir = path.join(__dirname, '.n8n', 'workflows');
   
-  // Verify n8n is available before starting
   try {
-    execSync('n8n --version', { stdio: 'pipe' });
-    console.log('✅ n8n is available in environment');
+    await access(workflowDir, fs.constants.F_OK);
+    console.log(`✅ Workflow directory exists: ${workflowDir}`);
   } catch (error) {
-    console.error('❌ n8n is not available in environment. Please ensure n8n is properly installed.');
-    console.error('Error details:', error.message);
-    return;
+    // Directory doesn't exist, create it
+    await mkdir(workflowDir, { recursive: true });
+    console.log(`✅ Created workflow directory: ${workflowDir}`);
   }
   
+  return workflowDir;
+}
+
+async function importWorkflows() {
+  console.log('🔄 Starting workflow import process...');
+  
+  // Ensure the workflow directory exists
+  const workflowDir = await ensureWorkflowDirectory();
+  
   for (const workflowFile of WORKFLOW_FILES) {
-    const workflowPath = path.join(__dirname, workflowFile);
+    const sourcePath = path.join(__dirname, workflowFile);
     
-    if (fs.existsSync(workflowPath)) {
-      console.log(`📥 Importing workflow: ${workflowFile}`);
+    try {
+      // Check if source file exists
+      await access(sourcePath, fs.constants.F_OK);
+      console.log(`📥 Processing workflow: ${workflowFile}`);
       
-      try {
-        // Read workflow file to validate it before import
-        const workflowContent = fs.readFileSync(workflowPath, 'utf8');
-        const workflow = JSON.parse(workflowContent);
-        
-        console.log(`   - Workflow name: ${workflow.name}`);
-        console.log(`   - Active: ${workflow.active}`);
-        console.log(`   - Node count: ${workflow.nodes?.length || 0}`);
-        
-        // Use n8n's built-in import command
-        // Add --force flag to overwrite existing workflows if needed
-        const result = spawn('n8n', ['import:workflow', '--input', workflowPath, '--force'], {
-          stdio: 'inherit',
-          env: { ...process.env }
-        });
-        
-        await new Promise((resolve, reject) => {
-          result.on('close', (code) => {
-            if (code === 0) {
-              console.log(`✅ Successfully imported workflow: ${workflowFile}`);
-              resolve();
-            } else {
-              console.log(`⚠️  Workflow import may have failed for: ${workflowFile} (exit code: ${code})`);
-              resolve(); // Continue with other imports even if one fails
-            }
-          });
-        });
-      } catch (error) {
-        console.error(`❌ Error importing workflow ${workflowFile}:`, error.message);
-        if (error instanceof SyntaxError) {
-          console.error(`❌ The workflow file ${workflowFile} may be corrupted or not valid JSON`);
-        }
+      // Copy workflow file to n8n's default workflow directory
+      const destPath = path.join(workflowDir, workflowFile);
+      await copyFile(sourcePath, destPath);
+      
+      console.log(`✅ Workflow copied to n8n: ${workflowFile}`);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        console.log(`⚠️  Workflow file not found: ${workflowFile}`);
+      } else {
+        console.error(`❌ Error copying workflow ${workflowFile}:`, error.message);
       }
-    } else {
-      console.log(`⚠️  Workflow file not found: ${workflowFile}`);
-      console.log(`   - Expected path: ${workflowPath}`);
-      console.log(`   - Available files in directory:`, fs.readdirSync(__dirname).filter(f => f.endsWith('.json')));
     }
   }
   
-  // Wait a moment to ensure all workflows are properly registered
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  
-  console.log('✅ Workflow import process completed.');
-};
+  console.log('✅ Workflow import process completed. Workflows will be available when n8n starts.');
+}
 
 // Run the import
 if (require.main === module) {
-  importWorkflows().catch(console.error);
+  importWorkflows()
+    .then(() => {
+      console.log('🎉 All workflow preparations completed!');
+    })
+    .catch(error => {
+      console.error('❌ Error during workflow import:', error);
+      process.exit(1);
+    });
 }
 
 module.exports = { importWorkflows };

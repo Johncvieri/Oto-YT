@@ -16,7 +16,7 @@
     }
   },
   "deploy": {
-    "cmd": ["sh", "-c", "node import-workflows.js && node railway-setup.js"],
+    "cmd": ["sh", "./start.sh"],
     "healthcheck": "/healthz",
     "sleepApplication": false
   },
@@ -29,6 +29,16 @@
     "N8N_PERSONALIZATION_ENABLED": { "value": "true", "type": "string" },
     "N8N_HEALTH_CHECKER": { "value": "true", "type": "string" },
     "N8N_TRUST_PROXY": { "value": "true", "type": "string" },
+    "N8N_DIAGNOSTICS_ENABLED": { "value": "true", "type": "string" },
+    "N8N_PUBLIC_API_DISABLED": { "value": "false", "type": "string" },
+    "N8N_VERSION_NOTIFICATIONS_ENABLED": { "value": "true", "type": "string" },
+    "N8N_EXECUTIONS_MODE": { "value": "regular", "type": "string" },
+    "N8N_ROOT_URL": { "value": "https://${RAILWAY_PUBLIC_HOST}", "type": "string" },
+    "N8N_PROTOCOL": { "value": "https", "type": "string" },
+    "N8N_PATH": { "value": "/", "type": "string" },
+    "N8N_METADATA_DB_TABLE_NAMES": { "value": "true", "type": "string" },
+    "N8N_DB_TYPE": { "value": "sqlite", "type": "string" },
+    "DB_SQLITE_PATH": { "value": "./n8n-database.db", "type": "string" },
     "NIXPACKS_NODE_PRUNE": { "value": "true", "type": "string" },
     "NPM_CONFIG_PRODUCTION": { "value": "false", "type": "string" }
   },

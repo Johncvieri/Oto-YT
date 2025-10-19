@@ -7,6 +7,7 @@
 
 // Load environment variables
 require('dotenv').config();
+const path = require('path');
 
 // --- Constants Definitions ---
 const DEFAULT_PORT = process.env.PORT || 5678;
@@ -34,12 +35,20 @@ process.env.N8N_PERSONALIZATION_ENABLED = process.env.N8N_PERSONALIZATION_ENABLE
 process.env.N8N_HEALTH_CHECKER = N8N_DEFAULTS.HEALTH_CHECKER;
 process.env.N8N_TRUST_PROXY = process.env.N8N_TRUST_PROXY || N8N_DEFAULTS.TRUST_PROXY;
 
-// Additional settings for UI/dashboard accessibility
+// Additional settings for UI/dashboard accessibility and HTTPS
 process.env.N8N_DIAGNOSTICS_ENABLED = process.env.N8N_DIAGNOSTICS_ENABLED || 'true';
 process.env.N8N_PUBLIC_API_DISABLED = process.env.N8N_PUBLIC_API_DISABLED || 'false';
 process.env.N8N_VERSION_NOTIFICATIONS_ENABLED = process.env.N8N_VERSION_NOTIFICATIONS_ENABLED || 'true';
 // Set execution mode for proper dashboard functionality
 process.env.N8N_EXECUTIONS_MODE = process.env.N8N_EXECUTIONS_MODE || 'regular';
+// Enable HTTPS settings for Railway
+process.env.N8N_PROTOCOL = process.env.N8N_PROTOCOL || 'https';
+process.env.N8N_PATH = process.env.N8N_PATH || '/';
+// Use database for workflow storage instead of default file system
+process.env.N8N_METADATA_DB_TABLE_NAMES = process.env.N8N_METADATA_DB_TABLE_NAMES || 'true';
+// Use default SQLite for workflow storage to avoid conflicts with Supabase
+process.env.N8N_DB_TYPE = 'sqlite';
+process.env.DB_SQLITE_PATH = './n8n-database.db';
 
 // Determine the base URL based on environment
 const getBaseUrl = () => {
