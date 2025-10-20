@@ -162,15 +162,22 @@ const startApplication = async () => {
     }
   });
 
-  console.log('✅ n8n process started with monitoring. Dashboard available at:', `https://${process.env.RAILWAY_PUBLIC_HOST}`);
+  // Determine the correct app URL
+  const appUrl = process.env.RAILWAY_PUBLIC_HOST 
+    ? `https://${process.env.RAILWAY_PUBLIC_HOST}` 
+    : (process.env.HEROKU_APP_NAME 
+      ? `https://${process.env.HEROKU_APP_NAME}.herokuapp.com` 
+      : `http://localhost:${port}`);
+  
+  console.log('✅ n8n process started with monitoring. Dashboard available at:', appUrl);
   
   // Log the dashboard URL after a delay to let n8n start
   setTimeout(() => {
     console.log('');
     console.log('📋 Access Information:');
-    console.log(`   Dashboard: https://${process.env.RAILWAY_PUBLIC_HOST}`);
-    console.log(`   Health Check: https://${process.env.RAILWAY_PUBLIC_HOST}/healthz`);
-    console.log(`   Workflow Status: https://${process.env.RAILWAY_PUBLIC_HOST}/workflow-status`);
+    console.log(`   Dashboard: ${appUrl}`);
+    console.log(`   Health Check: ${appUrl}/healthz`);
+    console.log(`   Workflow Status: ${appUrl}/workflow-status`);
     console.log('');
     console.log('💡 Login credentials: Use the N8N_BASIC_AUTH_USER and N8N_BASIC_AUTH_PASSWORD variables');
   }, 10000);
