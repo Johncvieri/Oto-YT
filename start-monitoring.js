@@ -77,6 +77,7 @@ async function startApplication() {
   console.log(`   N8N_TRUST_PROXY: ${env.N8N_TRUST_PROXY} (CRITICAL)`);
   console.log(`   N8N_ROOT_URL: ${env.N8N_ROOT_URL}`);
   console.log(`   N8N_BASIC_AUTH_ACTIVE: ${env.N8N_BASIC_AUTH_ACTIVE} (UNIFIED)`);
+  console.log(`   N8N_USER_MANAGEMENT_ENABLED: ${env.N8N_USER_MANAGEMENT_ENABLED} (UNIFIED)`);
   console.log(`   N8N_DISABLE_UI: ${env.N8N_DISABLE_UI} (UNIFIED)`);
   console.log(`   N8N_HEADLESS: ${env.N8N_HEADLESS} (UNIFIED)`);
   console.log(`   EXECUTIONS_PROCESS: ${env.EXECUTIONS_PROCESS} (UNIFIED)`);

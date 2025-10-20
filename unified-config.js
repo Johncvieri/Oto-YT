@@ -36,11 +36,12 @@ process.env.EXECUTIONS_PROCESS = process.env.EXECUTIONS_PROCESS || 'main';
 process.env.N8N_RUNNERS_ENABLED = process.env.N8N_RUNNERS_ENABLED || 'true';
 
 // CRITICAL: Authentication and UI settings (consistent across the application)
-process.env.N8N_BASIC_AUTH_ACTIVE = 'true';           // Enable basic auth to show auth page instead of setup
-process.env.N8N_DISABLE_UI = 'false';                 // Enable UI for monitoring
-process.env.N8N_HEADLESS = 'false';                   // Non-headless mode
-process.env.N8N_USER_MANAGEMENT_ENABLED = 'true';     // Enable user management for monitoring
-process.env.N8N_USER_MANAGEMENT_DISABLED = 'false';   // Enable user management for monitoring (DEPRECATED - use N8N_USER_MANAGEMENT_ENABLED)
+// Only set default values if not already defined in environment
+process.env.N8N_BASIC_AUTH_ACTIVE = process.env.N8N_BASIC_AUTH_ACTIVE || 'true';           // Enable basic auth to show auth page instead of setup
+process.env.N8N_DISABLE_UI = process.env.N8N_DISABLE_UI || 'false';                 // Enable UI for monitoring
+process.env.N8N_HEADLESS = process.env.N8N_HEADLESS || 'false';                     // Non-headless mode
+process.env.N8N_USER_MANAGEMENT_ENABLED = process.env.N8N_USER_MANAGEMENT_ENABLED || 'false';   // Respect Railway setting
+process.env.N8N_USER_MANAGEMENT_DISABLED = process.env.N8N_USER_MANAGEMENT_DISABLED || 'true';   // Respect Railway setting (DEPRECATED - use N8N_USER_MANAGEMENT_ENABLED)
 
 // Security settings
 process.env.N8N_SECURE_COOKIE = process.env.N8N_SECURE_COOKIE || 'true';
