@@ -3,29 +3,30 @@
  * 
  * This file ensures that all environment variables from .env are properly applied
  * with additional Railway-specific configurations to ensure smooth operation.
+ * NOTE: Preload config already sets critical proxy settings, so we focus on other configurations here.
  */
 
 // Load environment variables from .env file first
 require('dotenv').config();
 
 // Ensure Railway-specific configurations are applied
-console.log('🔧 Applying Railway-specific configurations...');
+console.log('🔧 Applying additional Railway-specific configurations...');
 
-// Critical proxy settings for Railway (addresses X-Forwarded-For error)
-process.env.N8N_TRUST_PROXY = process.env.N8N_TRUST_PROXY || 'true';
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = process.env.NODE_TLS_REJECT_UNAUTHORIZED || '0';
-
-// Apply your specific settings from .env with fallbacks
+// Apply your specific settings from .env with fallbacks (avoiding proxy settings already set in preload)
 process.env.N8N_PROTOCOL = process.env.N8N_PROTOCOL || 'https';
 process.env.N8N_HOST = process.env.N8N_HOST || '0.0.0.0';
 process.env.N8N_PORT = process.env.N8N_PORT || process.env.PORT || '5678';
 process.env.PORT = process.env.PORT || '5678';
 
-// Default to your Railway URL if not set
-if (process.env.RAILWAY_PUBLIC_HOST) {
-  process.env.N8N_ROOT_URL = process.env.N8N_ROOT_URL || `https://${process.env.RAILWAY_PUBLIC_HOST}`;
-  process.env.WEBHOOK_URL = process.env.WEBHOOK_URL || `https://${process.env.RAILWAY_PUBLIC_HOST}`;
-}
+// Default to your Railway URL if not set (but don't overwrite what's already in preload)
+process.env.N8N_ROOT_URL = process.env.N8N_ROOT_URL || 
+  process.env.WEBHOOK_URL || 
+  (process.env.RAILWAY_PUBLIC_HOST && `https://${process.env.RAILWAY_PUBLIC_HOST}`) || 
+  'http://localhost:5678';
+  
+process.env.WEBHOOK_URL = process.env.WEBHOOK_URL || 
+  (process.env.RAILWAY_PUBLIC_HOST && `https://${process.env.RAILWAY_PUBLIC_HOST}`) || 
+  `http://localhost:${process.env.PORT}`;
 
 // Apply your execution settings
 process.env.EXECUTIONS_PROCESS = process.env.EXECUTIONS_PROCESS || 'main';
@@ -51,12 +52,14 @@ process.env.N8N_DIAGNOSTICS_ENABLED = process.env.N8N_DIAGNOSTICS_ENABLED || 'tr
 process.env.N8N_DISABLE_UI = 'false';
 process.env.N8N_HEADLESS = 'false';
 
-console.log('✅ Railway-specific configurations applied');
-console.log(`   N8N_TRUST_PROXY: ${process.env.N8N_TRUST_PROXY} (CRITICAL FOR RAILWAY)`);
+console.log('✅ Additional Railway-specific configurations applied');
 console.log(`   N8N_ROOT_URL: ${process.env.N8N_ROOT_URL}`);
 console.log(`   WEBHOOK_URL: ${process.env.WEBHOOK_URL}`);
 console.log(`   N8N_PROTOCOL: ${process.env.N8N_PROTOCOL}`);
 console.log(`   TZ: ${process.env.TZ}`);
+
+// Log proxy settings that were set in preload
+console.log(`   N8N_TRUST_PROXY (from preload): ${process.env.N8N_TRUST_PROXY} (CRITICAL FOR RAILWAY)`);
 
 module.exports = {
   // Export function to ensure configurations are applied

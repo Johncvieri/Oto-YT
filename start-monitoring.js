@@ -5,6 +5,9 @@
  * CRITICAL: Ensures proxy settings are correctly configured for Railway
  */
 
+// CRITICAL: Load preload configuration FIRST to prevent proxy errors
+require('./preload-config');
+
 const { spawn } = require('child_process');
 const http = require('http');
 

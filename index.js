@@ -4,6 +4,9 @@
  * Following successful Railway deployment approach based on .env configuration
  */
 
+// CRITICAL: Load preload configuration FIRST to prevent proxy errors
+require('./preload-config');
+
 // Load environment configuration for Railway deployment
 require('./config/railway-setup');
 
