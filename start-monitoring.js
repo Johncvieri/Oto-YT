@@ -2,10 +2,10 @@
  * Enhanced Startup and Monitoring Script for Railway Deployment
  * 
  * This script handles proper startup with monitoring and prevents sleep issues
- * CRITICAL: Ensures proxy settings are correctly configured for Railway
+ * CRITICAL: Ensures proxy settings are correctly configured for Railway to avoid X-Forwarded-For errors
  */
 
-// CRITICAL: Apply all Railway configurations before starting n8n
+// CRITICAL: Apply all Railway configurations before ANY other operations
 // This addresses the fundamental X-Forwarded-For error
 process.env.N8N_TRUST_PROXY = 'true';  // MOST CRITICAL SETTING FOR RAILWAY
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -19,6 +19,36 @@ process.env.N8N_PROTOCOL = 'https';
 process.env.EXECUTIONS_PROCESS = process.env.EXECUTIONS_PROCESS || 'main';
 process.env.N8N_RUNNERS_ENABLED = process.env.N8N_RUNNERS_ENABLED || 'true';
 process.env.TZ = process.env.TZ || 'Asia/Jakarta';
+
+// Additional monitoring and settings
+// IMPORTANT: Don't override auth/UI settings from railway.json
+// Let railway.json handle user management, UI, and auth settings
+// process.env.N8N_USER_MANAGEMENT_DISABLED = 'false';  // Let railway.json handle this
+// process.env.N8N_DISABLE_UI = 'false';               // Let railway.json handle this
+// process.env.N8N_HEADLESS = 'false';                 // Let railway.json handle this
+process.env.N8N_METRICS = 'true';
+process.env.N8N_DIAGNOSTICS_ENABLED = 'true';
+
+// Load environment early (this may override some settings if in .env)
+require('dotenv').config();
+
+// ENSURE CRITICAL SETTINGS AFTER dotenv (in case .env overrides them)
+process.env.N8N_TRUST_PROXY = 'true';  // RE-ENSURE this critical setting
+process.env.N8N_PROTOCOL = 'https';    // RE-ENSURE HTTPS for Railway
+process.env.EXECUTIONS_PROCESS = 'main';  // RE-ENSURE your execution setting
+process.env.N8N_RUNNERS_ENABLED = 'true'; // RE-ENSURE your runner setting
+
+// Additional monitoring setup
+process.env.N8N_TELEMETRY_ENABLED = 'false';  // Disable for privacy
+process.env.N8N_INTERNAL_HOOKS_DISABLED = 'false';  // Enable for monitoring
+process.env.N8N_EXECUTIONS_DATA_SAVE_PER_WORKFLOW = 'true';
+process.env.N8N_EXECUTIONS_DATA_PRUNE = 'false';  // Keep execution data for monitoring
+
+console.log('🔧 Critical proxy configuration applied in start-monitoring.js:');
+console.log(`   N8N_TRUST_PROXY: ${process.env.N8N_TRUST_PROXY} (CRITICAL!)`);
+console.log(`   N8N_ROOT_URL: ${process.env.N8N_ROOT_URL}`);
+console.log(`   EXECUTIONS_PROCESS: ${process.env.EXECUTIONS_PROCESS} (as per your .env)`);
+console.log(`   N8N_RUNNERS_ENABLED: ${process.env.N8N_RUNNERS_ENABLED} (as per your .env)`);
 
 const { spawn } = require('child_process');
 const http = require('http');
@@ -59,7 +89,7 @@ function preventSleep(url) {
 async function startApplication() {
   console.log('🚀 Starting YouTube Automation System with Proxy Configuration...');
   
-  // Prepare environment with ALL necessary variables, especially proxy settings for Railway
+  // Prepare environment with proxy settings, respecting auth settings from railway.json
   const env = { 
     ...process.env,
     // CRITICAL PROXY SETTINGS FOR RAILWAY - These fix the X-Forwarded-For error
@@ -70,6 +100,8 @@ async function startApplication() {
     NODE_TLS_REJECT_UNAUTHORIZED: '0', // Required for proxy handling
     // Additional important settings
     N8N_ROOT_URL: process.env.WEBHOOK_URL || `https://${process.env.RAILWAY_PUBLIC_HOST || 'localhost:5678'}`,
+    // IMPORTANT: Don't override auth settings that are configured in railway.json
+    // N8N_USER_MANAGEMENT_DISABLED, N8N_DISABLE_UI, N8N_BASIC_AUTH_ACTIVE - let railway.json handle these
     // Ensure the correct URL is available to child processes
     RAILWAY_PUBLIC_HOST: process.env.RAILWAY_PUBLIC_HOST || process.env.HEROKU_APP_NAME
   };
@@ -79,10 +111,12 @@ async function startApplication() {
   console.log(`   N8N_PROXY_HOST: ${env.N8N_PROXY_HOST}`);
   console.log(`   N8N_PROXY_PORT: ${env.N8N_PROXY_PORT}`);
   console.log(`   N8N_PROXY_SSL: ${env.N8N_PROXY_SSL}`);
-  console.log(`   NODE_TLS_REJECT_UNAUTHORIZED: ${env.NODE_TLS_REJECT_UNAUTHORIZED}`);
+  console.log(`   EXECUTIONS_PROCESS: ${env.EXECUTIONS_PROCESS} (as per your .env)`);
+  console.log(`   N8N_RUNNERS_ENABLED: ${env.N8N_RUNNERS_ENABLED} (as per your .env)`);
 
-  // Start the main app
-  const appProcess = spawn('node', ['index.js'], {
+  // Start n8n using the direct approach with your proven settings
+  // The railway-direct-start.js will handle proxy configuration internally
+  const appProcess = spawn('node', ['railway-direct-start.js'], {
     stdio: 'pipe',  // Use pipe to capture output
     env: env
   });

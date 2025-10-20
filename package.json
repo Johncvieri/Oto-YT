@@ -11,6 +11,7 @@
     "dev": "node index.js",
     "n8n": "n8n start",
     "n8n:tunnel": "n8n start --tunnel",
+    "start:direct": "node railway-direct-start.js",
     "import-workflows": "node import-workflows.js",
     "seed-supabase": "node seed-supabase.js",
     "verify-env": "node verify-env.js",
