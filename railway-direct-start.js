@@ -19,8 +19,8 @@ async function startN8n() {
       // These are the critical settings that must be applied before Express initializes
       N8N_TRUST_PROXY: 'true',           // Critical for Railway proxy handling - must be first!
       N8N_BASIC_AUTH_ACTIVE: process.env.N8N_BASIC_AUTH_ACTIVE || 'true',     // Respect Railway setting for auth
-      N8N_USER_MANAGEMENT_ENABLED: process.env.N8N_USER_MANAGEMENT_ENABLED || 'false', // Respect Railway setting
-      N8N_USER_MANAGEMENT_DISABLED: process.env.N8N_USER_MANAGEMENT_DISABLED || 'true', // Respect Railway setting (DEPRECATED - use N8N_USER_MANAGEMENT_ENABLED)
+      N8N_USER_MANAGEMENT_ENABLED: process.env.N8N_USER_MANAGEMENT_ENABLED || 'true', // Enable user management to show auth page instead of setup
+      N8N_USER_MANAGEMENT_DISABLED: process.env.N8N_USER_MANAGEMENT_DISABLED || 'false', // Ensure user management is not disabled (DEPRECATED - use N8N_USER_MANAGEMENT_ENABLED)
       N8N_DISABLE_UI: process.env.N8N_DISABLE_UI || 'false',           // Respect Railway setting
       N8N_HEADLESS: process.env.N8N_HEADLESS || 'false',               // Respect Railway setting
       EXECUTIONS_PROCESS: process.env.EXECUTIONS_PROCESS || 'main',        // Your proven setting
