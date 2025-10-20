@@ -52,10 +52,18 @@ process.env.N8N_HOST = process.env.N8N_HOST || '0.0.0.0';
 process.env.N8N_PORT = process.env.N8N_PORT || process.env.PORT || '5678';
 process.env.PORT = process.env.PORT || '5678';
 
-// Database settings
+// Database settings - Optimized for low-tier
 process.env.N8N_DB_TYPE = process.env.N8N_DB_TYPE || 'sqlite';
 process.env.DB_SQLITE_PATH = process.env.DB_SQLITE_PATH || './n8n-database.db';
 process.env.N8N_EXECUTIONS_MODE = process.env.N8N_EXECUTIONS_MODE || 'regular';
+
+// Resource optimization for low-tier systems
+process.env.N8N_MEMORY_MODE = 'strict'; // Optimize memory usage
+process.env.N8N_EXECUTIONS_DATA_SAVE_PER_WORKFLOW = 'onError'; // Only save on error to save space
+process.env.N8N_EXECUTIONS_DATA_PRUNE = 'true'; // Prune old executions
+process.env.N8N_EXECUTIONS_DATA_MAX_AGE = '1'; // Keep execution data only for 1 day
+process.env.N8N_EXECUTIONS_TIMEOUT = '1800000'; // 30 minutes timeout for low-tier
+process.env.N8N_QUEUE_BULL_REDIS_HOST = ''; // Disable Redis to save resources
 
 // Monitoring and health settings
 process.env.N8N_HEALTH_CHECKER = process.env.N8N_HEALTH_CHECKER || 'true';
