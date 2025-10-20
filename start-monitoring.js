@@ -8,6 +8,14 @@
 // Apply unified configuration first
 require('./unified-config');
 
+// Initialize n8n with default user to avoid setup page
+try {
+  require('./initialize-n8n');
+  console.log('🔧 n8n initialization module loaded');
+} catch (error) {
+  console.log('⚠️  n8n initialization module not available, continuing startup:', error.message);
+}
+
 // Additional monitoring settings that should be applied after unified config
 process.env.N8N_METRICS = 'true';
 process.env.N8N_DIAGNOSTICS_ENABLED = 'true';

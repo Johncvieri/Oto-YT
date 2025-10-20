@@ -80,6 +80,10 @@ process.env.N8N_HEADLESS = 'false';             // CRITICAL - non-headless
 process.env.N8N_USER_MANAGEMENT_ENABLED = 'true';   // CRITICAL - enable user management
 process.env.N8N_USER_MANAGEMENT_DISABLED = 'false'; // CRITICAL - enable user management (DEPRECATED - use N8N_USER_MANAGEMENT_ENABLED)
 
+// Additional settings to ensure setup page is skipped
+process.env.N8N_PERSONALIZATION_ENABLED = 'false';   // Disable personalization to avoid setup
+process.env.N8N_DIAGNOSTICS_ENABLED = 'false';       // Avoid diagnostics setup
+
 console.log('✅ Unified configuration applied:');
 console.log(`   N8N_TRUST_PROXY: ${process.env.N8N_TRUST_PROXY} (CRITICAL!)`);
 console.log(`   N8N_CONFIG_FILES: ${process.env.N8N_CONFIG_FILES} (ENSURING CONFIG FILE READ!)`);
