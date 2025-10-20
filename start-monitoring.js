@@ -67,6 +67,7 @@ async function startApplication() {
     N8N_PROXY_HOST: process.env.RAILWAY_PUBLIC_HOST || '0.0.0.0',
     N8N_PROXY_PORT: process.env.PORT || '443',
     N8N_PROXY_SSL: 'true',
+    N8N_USER_MANAGEMENT_ENABLED: 'true',  // Ensure user management is enabled
     NODE_TLS_REJECT_UNAUTHORIZED: '0', // Required for proxy handling
     // Ensure the correct URL is available to child processes
     RAILWAY_PUBLIC_HOST: process.env.RAILWAY_PUBLIC_HOST || process.env.HEROKU_APP_NAME

@@ -31,9 +31,9 @@ module.exports = {
   // Security
   // User management settings - CRITICAL for auth vs setup page  
   userManagement: {
-    enabled: process.env.N8N_USER_MANAGEMENT_ENABLED === 'true', // From documentation
-    disabled: process.env.N8N_USER_MANAGEMENT_DISABLED === 'true', // Respect Railway config
+    enabled: process.env.N8N_USER_MANAGEMENT_ENABLED !== 'false', // Enable user management
     isInstanceOwnerSetUp: true, // CRITICAL: Skip setup flow since we configure via env vars
+    skipInstanceOwnerSetup: true, // Skip the initial setup wizard entirely
   },
   
   security: {
@@ -41,7 +41,8 @@ module.exports = {
       active: process.env.N8N_BASIC_AUTH_ACTIVE !== 'false',
       user: process.env.N8N_BASIC_AUTH_USER || 'admin',
       password: process.env.N8N_BASIC_AUTH_PASSWORD || 'password'
-    }
+    },
+    excludeCredentialsFromResponse: false, // Ensure credentials work properly
   },
 
   // Host and port

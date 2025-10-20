@@ -8,6 +8,7 @@
 
 // CRITICAL: Apply trust proxy setting at the module level BEFORE any imports
 process.env.N8N_TRUST_PROXY = 'true';
+process.env.N8N_USER_MANAGEMENT_ENABLED = 'true';
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 console.log('🛡️  Early proxy setup applied at module level:');

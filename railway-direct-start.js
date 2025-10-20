@@ -19,7 +19,8 @@ async function startN8n() {
       // These are the critical settings that must be applied before Express initializes
       N8N_TRUST_PROXY: 'true',           // Critical for Railway proxy handling - must be first!
       N8N_BASIC_AUTH_ACTIVE: 'true',     // Ensure auth page shows instead of setup
-      N8N_USER_MANAGEMENT_DISABLED: 'false', // Enable user management
+      N8N_USER_MANAGEMENT_ENABLED: 'true', // Enable user management
+      N8N_USER_MANAGEMENT_DISABLED: 'false', // Enable user management (DEPRECATED - use N8N_USER_MANAGEMENT_ENABLED)
       N8N_DISABLE_UI: 'false',           // Enable UI
       N8N_HEADLESS: 'false',             // Non-headless mode
       EXECUTIONS_PROCESS: 'main',        // Your proven setting

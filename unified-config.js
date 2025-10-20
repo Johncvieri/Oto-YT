@@ -39,7 +39,8 @@ process.env.N8N_RUNNERS_ENABLED = process.env.N8N_RUNNERS_ENABLED || 'true';
 process.env.N8N_BASIC_AUTH_ACTIVE = 'true';           // Enable basic auth to show auth page instead of setup
 process.env.N8N_DISABLE_UI = 'false';                 // Enable UI for monitoring
 process.env.N8N_HEADLESS = 'false';                   // Non-headless mode
-process.env.N8N_USER_MANAGEMENT_DISABLED = 'false';   // Enable user management for monitoring
+process.env.N8N_USER_MANAGEMENT_ENABLED = 'true';     // Enable user management for monitoring
+process.env.N8N_USER_MANAGEMENT_DISABLED = 'false';   // Enable user management for monitoring (DEPRECATED - use N8N_USER_MANAGEMENT_ENABLED)
 
 // Security settings
 process.env.N8N_SECURE_COOKIE = process.env.N8N_SECURE_COOKIE || 'true';
@@ -75,7 +76,8 @@ process.env.N8N_PROTOCOL = 'https';             // CRITICAL - ensure HTTPS
 process.env.N8N_BASIC_AUTH_ACTIVE = 'true';     // CRITICAL - ensure auth page (not setup)
 process.env.N8N_DISABLE_UI = 'false';           // CRITICAL - enable UI
 process.env.N8N_HEADLESS = 'false';             // CRITICAL - non-headless
-process.env.N8N_USER_MANAGEMENT_DISABLED = 'false'; // CRITICAL - enable user management
+process.env.N8N_USER_MANAGEMENT_ENABLED = 'true';   // CRITICAL - enable user management
+process.env.N8N_USER_MANAGEMENT_DISABLED = 'false'; // CRITICAL - enable user management (DEPRECATED - use N8N_USER_MANAGEMENT_ENABLED)
 
 console.log('✅ Unified configuration applied:');
 console.log(`   N8N_TRUST_PROXY: ${process.env.N8N_TRUST_PROXY} (CRITICAL!)`);
