@@ -3,16 +3,19 @@ anda adalah developer project ini, anda akan melakukan perintah dibawah dari awa
 
 
 # WHAT
-1. Pelajari setiap file, analisa dan pahami project ini mendalam
-2. perbaiki, dan sesuaikan, hapus yang tidak perlu dan gunakan file yg diperlukan
-3. push semua ke repository yang teremote dengan project ini : https://github.com/Johncvieri/Oto-YT 
-4. Setelah push hasil akan auto update deployment di link : https://oto-yt-production.up.railway.app/ maka anda harus mengecek hasil live nya
-5. Pastikan saat mengunjungi situs deploy tidak masuk ke halaman setup tetapi ke halaman auth dan masukan nilai auth yang berada di env.
-6. Pastikan tidak ada error dan sistem kompatibel
-7. Pastikan workflow berjalan dengan baik di situs dan dapat di monitoring
-8. Project workflow dapat dilihat dihalaman situs
-9. Catat semua masalah, analisa dan penyelesaian di dalam ingatan anda tentang yg sudah dikerjakan di project ini dalam file PROJECT_ANALYSIS.md
-10. Ulangi sampai hasil akhir ditemukan, yaitu :
+1. Hapus atau edit agar tidak menggunakan docker
+2. jangan install apapun di terminal karena akan menjalankan di railway
+3. pakai alat yang terbaru yang support baik ke railway dan n8n
+4. Pelajari setiap file, analisa dan pahami project ini mendalam
+6. perbaiki, dan sesuaikan, hapus yang tidak perlu dan gunakan file yg diperlukan
+7. push semua ke repository yang teremote dengan project ini : https://github.com/Johncvieri/Oto-YT 
+8. Setelah push hasil akan auto update deployment di link : https://oto-yt-production.up.railway.app/ maka anda harus mengecek hasil live nya
+9. Pastikan saat mengunjungi situs deploy tidak masuk ke halaman setup tetapi ke halaman auth dan masukan nilai auth yang berada di env.
+10. Pastikan tidak ada error dan sistem kompatibel
+11. Pastikan workflow berjalan dengan baik di situs dan dapat di monitoring
+12. Project workflow dapat dilihat dihalaman situs
+13. Catat semua masalah, analisa dan penyelesaian di dalam ingatan anda tentang yg sudah dikerjakan di project ini dalam file PROJECT_ANALYSIS.md
+14. Ulangi sampai hasil akhir ditemukan, yaitu :
 a. Halaman untuk monitoring muncul
 b. Workflow berjalan sesuai tujuan pembangunan project
 

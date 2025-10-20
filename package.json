@@ -15,7 +15,7 @@
     "import-workflows": "node import-workflows.js",
     "seed-supabase": "node seed-supabase.js",
     "verify-env": "node verify-env.js",
-    "health": "node test.js",
+    "health": "node -e \"fetch('http://localhost:' + (process.env.PORT || 5678) + '/healthz').then(r => r.json()).then(console.log).catch(console.error);\"",
     "monitor": "node workflow-monitoring.js",
     "monitor:continuous": "node workflow-monitoring.js",
     "status": "node -e \"fetch('http://localhost:' + (process.env.PORT || 5678) + '/healthz').then(r => r.json()).then(console.log).catch(console.error);\"",
@@ -50,5 +50,8 @@
     "github",
     "gemini",
     "monitoring"
-  ]
+  ],
+  "resolutions": {
+    "n8n": "^1.115.3"
+  }
 }
