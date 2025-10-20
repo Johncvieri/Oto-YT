@@ -2,6 +2,7 @@
  * Enhanced Startup and Monitoring Script for Railway Deployment
  * 
  * This script handles proper startup with monitoring and prevents sleep issues
+ * CRITICAL: Ensures proxy settings are correctly configured for Railway
  */
 
 const { spawn } = require('child_process');
@@ -14,6 +15,8 @@ function getAppUrl() {
     return `https://${process.env.RAILWAY_PUBLIC_HOST}`;
   } else if (process.env.HEROKU_APP_NAME) {
     return `https://${process.env.HEROKU_APP_NAME}.herokuapp.com`;
+  } else if (process.env.WEBHOOK_URL) {
+    return process.env.WEBHOOK_URL;
   } else if (process.env.PORT) {
     return `http://localhost:${process.env.PORT}`;
   } else {
@@ -39,14 +42,29 @@ function preventSleep(url) {
 
 // Start the main application
 async function startApplication() {
-  console.log('🚀 Starting YouTube Automation System with Monitoring...');
+  console.log('🚀 Starting YouTube Automation System with Proxy Configuration...');
   
-  // Prepare environment with all necessary variables
+  // Prepare environment with ALL necessary variables, especially proxy settings for Railway
   const env = { 
     ...process.env,
+    // CRITICAL PROXY SETTINGS FOR RAILWAY - These fix the X-Forwarded-For error
+    N8N_TRUST_PROXY: 'true',           // Critical for Railway's load balancer
+    N8N_PROXY_HOST: process.env.RAILWAY_PUBLIC_HOST || '0.0.0.0',
+    N8N_PROXY_PORT: process.env.PORT || '443',
+    N8N_PROXY_SSL: 'true',
+    NODE_TLS_REJECT_UNAUTHORIZED: '0', // Required for proxy handling
+    // Additional important settings
+    N8N_ROOT_URL: process.env.WEBHOOK_URL || `https://${process.env.RAILWAY_PUBLIC_HOST || 'localhost:5678'}`,
     // Ensure the correct URL is available to child processes
     RAILWAY_PUBLIC_HOST: process.env.RAILWAY_PUBLIC_HOST || process.env.HEROKU_APP_NAME
   };
+
+  console.log('🔧 Setting proxy configuration for Railway deployment:');
+  console.log(`   N8N_TRUST_PROXY: ${env.N8N_TRUST_PROXY} (CRITICAL)`);
+  console.log(`   N8N_PROXY_HOST: ${env.N8N_PROXY_HOST}`);
+  console.log(`   N8N_PROXY_PORT: ${env.N8N_PROXY_PORT}`);
+  console.log(`   N8N_PROXY_SSL: ${env.N8N_PROXY_SSL}`);
+  console.log(`   NODE_TLS_REJECT_UNAUTHORIZED: ${env.NODE_TLS_REJECT_UNAUTHORIZED}`);
 
   // Start the main app
   const appProcess = spawn('node', ['index.js'], {
@@ -60,7 +78,14 @@ async function startApplication() {
   });
 
   appProcess.stderr.on('data', (data) => {
-    console.error(`[n8n-error] ${data.toString()}`);
+    const errorOutput = data.toString();
+    console.error(`[n8n-error] ${errorOutput}`);
+    
+    // Log when proxy errors occur
+    if (errorOutput.includes('X-Forwarded-For') || errorOutput.includes('ERR_ERL_UNEXPECTED_X_FORWARDED_FOR')) {
+      console.log('❌ PROXY ERROR: This should not happen with current configuration!');
+      console.log('💡 Check that N8N_TRUST_PROXY is set to true in all environments');
+    }
   });
 
   appProcess.on('error', (err) => {
@@ -84,7 +109,7 @@ async function startApplication() {
   
   // Start workflow monitoring after a delay (wait for n8n to be fully ready)
   setTimeout(() => {
-    console.log('🔄 Starting workflow monitoring after 60 seconds (allowing n8n to fully initialize)...');
+    console.log('🔄 Starting workflow monitoring after 90 seconds (allowing n8n to fully initialize)...');
     const monitorEnv = { 
       ...env,
       // Pass the correct app URL to the monitoring process
@@ -108,7 +133,7 @@ async function startApplication() {
           // Restart monitor after delay
           console.log('Restarting monitoring process...');
           startMonitoring();
-        }, 30000);
+        }, 60000); // Increased delay to 60 seconds
       }
     });
     
@@ -123,7 +148,7 @@ async function startApplication() {
         console.error('❌ Restarted monitor failed to start:', err);
       });
     }
-  }, 60000); // Start monitoring after 60 seconds (allow n8n to fully initialize)
+  }, 90000); // Increased to 90 seconds to ensure n8n is completely ready
 
   return appProcess;
 }

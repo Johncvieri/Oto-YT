@@ -1,8 +1,10 @@
 /**
- * YouTube Automation System with Enhanced Monitoring - Main Entry Point
+ * YouTube Automation System with Enhanced Proxy Configuration - Main Entry Point
+ * 
+ * This version specifically addresses the X-Forwarded-For error in Railway deployment
  */
 
-// Enable monitoring before importing other modules
+// Enable monitoring and proxy settings before importing other modules
 process.env.N8N_USER_MANAGEMENT_DISABLED = 'false';  // Enable for better monitoring
 process.env.N8N_DISABLE_UI = 'false';               // Enable UI for access
 process.env.N8N_HEADLESS = 'false';                 // Enable for dashboard access
@@ -12,29 +14,35 @@ process.env.N8N_DIAGNOSTICS_ENABLED = 'true';
 // Load environment early
 require('dotenv').config();
 
-// Additional monitoring setup
-process.env.N8N_HEALTH_CHECKER = 'true';
-process.env.N8N_TELEMETRY_ENABLED = 'false';  // Disable for privacy
-process.env.N8N_INTERNAL_HOOKS_DISABLED = 'false';  // Enable for monitoring
-process.env.N8N_EXECUTIONS_DATA_SAVE_PER_WORKFLOW = 'true';
-process.env.N8N_EXECUTIONS_DATA_PRUNE = 'false';  // Keep execution data for monitoring
-
-// Set n8n to run with dashboard enabled
-process.env.N8N_BASIC_AUTH_ACTIVE = process.env.N8N_BASIC_AUTH_ACTIVE || 'true';
-process.env.N8N_SECURE_COOKIE = process.env.N8N_SECURE_COOKIE || 'true';
-process.env.N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS = 'false';
-process.env.N8N_PERSONALIZATION_ENABLED = 'false';
-
-// Proxy configuration for Railway
-process.env.N8N_TRUST_PROXY = '1';
-process.env.N8N_ROOT_URL = `https://${process.env.RAILWAY_PUBLIC_HOST}`;
+// CRITICAL: Proxy configuration for Railway - Must be set before n8n starts
+process.env.N8N_TRUST_PROXY = 'true';  // This is the key to fixing the X-Forwarded-For error
+process.env.N8N_ROOT_URL = process.env.WEBHOOK_URL || `https://${process.env.RAILWAY_PUBLIC_HOST || 'localhost:5678'}`;
 process.env.N8N_PROTOCOL = 'https';
 process.env.N8N_PATH = '/';
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Required for proxy handling
+
+// Additional settings to address proxy validation
+process.env.N8N_PROXY_HOST = process.env.RAILWAY_PUBLIC_HOST || '0.0.0.0';
+process.env.N8N_PROXY_PORT = process.env.PORT || '443';
+process.env.N8N_PROXY_SSL = 'true';
 
 // Database configuration
 process.env.N8N_DB_TYPE = 'sqlite';
 process.env.DB_SQLITE_PATH = './n8n-database.db';
 process.env.N8N_EXECUTIONS_MODE = 'regular';
+
+// Security & Authentication
+process.env.N8N_BASIC_AUTH_ACTIVE = process.env.N8N_BASIC_AUTH_ACTIVE || 'true';
+process.env.N8N_SECURE_COOKIE = process.env.N8N_SECURE_COOKIE || 'true';
+process.env.N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS = 'false';
+process.env.N8N_PERSONALIZATION_ENABLED = 'false';
+
+// Monitoring setup
+process.env.N8N_HEALTH_CHECKER = 'true';
+process.env.N8N_TELEMETRY_ENABLED = 'false';  // Disable for privacy
+process.env.N8N_INTERNAL_HOOKS_DISABLED = 'false';  // Enable for monitoring
+process.env.N8N_EXECUTIONS_DATA_SAVE_PER_WORKFLOW = 'true';
+process.env.N8N_EXECUTIONS_DATA_PRUNE = 'false';  // Keep execution data for monitoring
 
 // Load required modules after setting environment
 const path = require('path');
@@ -50,40 +58,25 @@ const REQUIRED_ENV_VARS = [
   'YOUTUBE_CHANNEL_1'
 ];
 
-const N8N_DEFAULTS = {
-  HOST: '0.0.0.0',
-  BASIC_AUTH_ACTIVE: 'true',  // Changed to true for security
-  SECURE_COOKIE: 'true',      // Changed to true for security
-  ENFORCE_SETTINGS_FILE_PERMISSIONS: 'false',
-  PERSONALIZATION_ENABLED: 'false',
-  HEALTH_CHECKER: 'true',
-  TRUST_PROXY: 'true'
-};
-
 // --- Environment Configuration ---
 const port = parseInt(DEFAULT_PORT);
 
-// Configure n8n environment variables
-process.env.N8N_HOST = process.env.N8N_HOST || N8N_DEFAULTS.HOST;
-process.env.N8N_PORT = port.toString();
-process.env.N8N_BASIC_AUTH_ACTIVE = process.env.N8N_BASIC_AUTH_ACTIVE || N8N_DEFAULTS.BASIC_AUTH_ACTIVE;
-process.env.N8N_SECURE_COOKIE = process.env.N8N_SECURE_COOKIE || N8N_DEFAULTS.SECURE_COOKIE;
-process.env.N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS = process.env.N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS || N8N_DEFAULTS.ENFORCE_SETTINGS_FILE_PERMISSIONS;
-process.env.N8N_PERSONALIZATION_ENABLED = process.env.N8N_PERSONALIZATION_ENABLED || N8N_DEFAULTS.PERSONALIZATION_ENABLED;
-process.env.N8N_HEALTH_CHECKER = N8N_DEFAULTS.HEALTH_CHECKER;
-process.env.N8N_TRUST_PROXY = process.env.N8N_TRUST_PROXY || N8N_DEFAULTS.TRUST_PROXY;
-
-// Additional monitoring settings
-process.env.N8N_DIAGNOSTICS_ENABLED = process.env.N8N_DIAGNOSTICS_ENABLED || 'true';
+// Ensure critical n8n environment variables are properly set
+process.env.N8N_HOST = process.env.N8N_HOST || '0.0.0.0';
+process.env.N8N_PORT = process.env.N8N_PORT || port.toString();
+process.env.N8N_TRUST_PROXY = 'true'; // CRITICAL: Must be true for Railway
+process.env.N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS = 'false';
+process.env.N8N_PERSONALIZATION_ENABLED = 'false';
+process.env.N8N_HEALTH_CHECKER = 'true';
+process.env.N8N_DIAGNOSTICS_ENABLED = 'true';
 process.env.N8N_PUBLIC_API_DISABLED = process.env.N8N_PUBLIC_API_DISABLED || 'false';
 process.env.N8N_VERSION_NOTIFICATIONS_ENABLED = process.env.N8N_VERSION_NOTIFICATIONS_ENABLED || 'true';
 process.env.N8N_EXECUTIONS_MODE = process.env.N8N_EXECUTIONS_MODE || 'regular';
 process.env.N8N_PROTOCOL = process.env.N8N_PROTOCOL || 'https';
 process.env.N8N_PATH = process.env.N8N_PATH || '/';
 process.env.N8N_METADATA_DB_TABLE_NAMES = process.env.N8N_METADATA_DB_TABLE_NAMES || 'true';
-process.env.N8N_DB_TYPE = 'sqlite';
-process.env.DB_SQLITE_PATH = './n8n-database.db';
 process.env.N8N_WORKFLOW_TAGS_DISABLED = 'false';
+process.env.N8N_USER_MANAGEMENT_DISABLED = 'false';
 
 // --- Environment Validation ---
 const validateEnvironment = () => {
@@ -101,46 +94,65 @@ const validateEnvironment = () => {
 
 // --- Enhanced Application Start ---
 const startApplication = async () => {
-  console.log('🚀 YouTube Automation System with Enhanced Monitoring');
-  console.log('====================================================');
-  console.log('Starting n8n with monitoring enabled:');
+  console.log('🚀 YouTube Automation System with Enhanced Proxy Configuration');
+  console.log('===============================================================');
+  console.log('Starting n8n with Railway-compatible proxy settings:');
   console.log(`  - Host: ${process.env.N8N_HOST}`);
   console.log(`  - Port: ${process.env.N8N_PORT}`);
   console.log(`  - Basic Auth: ${process.env.N8N_BASIC_AUTH_ACTIVE}`);
   console.log(`  - Health Checker: ${process.env.N8N_HEALTH_CHECKER}`);
-  console.log(`  - Trust Proxy: ${process.env.N8N_TRUST_PROXY}`);
+  console.log(`  - Trust Proxy: ${process.env.N8N_TRUST_PROXY} (CRITICAL FOR RAILWAY)`);
   console.log(`  - Webhook URL: ${process.env.WEBHOOK_URL || `https://${process.env.RAILWAY_PUBLIC_HOST}`}`);
+  console.log(`  - Proxy Host: ${process.env.N8N_PROXY_HOST}`);
+  console.log(`  - Proxy Port: ${process.env.N8N_PROXY_PORT}`);
+  console.log(`  - Proxy SSL: ${process.env.N8N_PROXY_SSL}`);
   console.log('');
 
-  // Set trust proxy early
-  process.env.N8N_TRUST_PROXY = 'true';
-  process.env.N8N_ROOT_URL = `https://${process.env.RAILWAY_PUBLIC_HOST}`;
-  process.env.N8N_PROXY_HOST = process.env.RAILWAY_PUBLIC_HOST;
-  process.env.N8N_PROXY_PORT = process.env.PORT || '443';
-  process.env.N8N_PROXY_SSL = 'true';
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
-  // Set the trust proxy in the spawn environment explicitly
+  // Prepare environment with all necessary proxy settings
   const envWithProxy = {
     ...process.env,
-    N8N_TRUST_PROXY: 'true',
-    N8N_ROOT_URL: `https://${process.env.RAILWAY_PUBLIC_HOST}`,
-    N8N_PROXY_SSL: 'true'
+    // CRITICAL: Ensure these proxy settings are passed to the n8n process
+    N8N_TRUST_PROXY: 'true', // This is the key to fixing the X-Forwarded-For error
+    N8N_ROOT_URL: process.env.WEBHOOK_URL || `https://${process.env.RAILWAY_PUBLIC_HOST || 'localhost:' + port}`,
+    N8N_PROXY_HOST: process.env.RAILWAY_PUBLIC_HOST || '0.0.0.0',
+    N8N_PROXY_PORT: process.env.PORT || '443',
+    N8N_PROXY_SSL: 'true',
+    NODE_TLS_REJECT_UNAUTHORIZED: '0' // Required for proxy handling
   };
+
+  // CRITICAL: Set the process environment before spawning n8n
+  Object.assign(process.env, envWithProxy);
 
   // Start n8n as a child process
   const n8nProcess = spawn('n8n', ['start'], {
     env: envWithProxy,
-    stdio: ['pipe', 'pipe', 'pipe'] // Use pipe for better control
+    stdio: ['pipe', 'pipe', 'pipe'], // Use pipe for better control
+    detached: false  // Keep process attached for proper control
   });
 
   // Capture n8n output
   n8nProcess.stdout.on('data', (data) => {
-    console.log(`[n8n] ${data.toString()}`);
+    const output = data.toString();
+    console.log(`[n8n] ${output}`);
+    
+    // If we see specific proxy errors, log additional info
+    if (output.includes('X-Forwarded-For') || output.includes('ERR_ERL_UNEXPECTED_X_FORWARDED_FOR')) {
+      console.log('⚠️  Detected proxy configuration issue. This should not happen with current settings.');
+      console.log('💡 Ensure Railway environment has proper proxy settings.');
+    }
   });
 
   n8nProcess.stderr.on('data', (data) => {
-    console.error(`[n8n-error] ${data.toString()}`);
+    const errorOutput = data.toString();
+    console.error(`[n8n-error] ${errorOutput}`);
+    
+    // Check for the specific proxy validation error
+    if (errorOutput.includes('ERR_ERL_UNEXPECTED_X_FORWARDED_FOR')) {
+      console.log('❌ CRITICAL: Proxy configuration error detected!');
+      console.log('💡 This indicates N8N_TRUST_PROXY is not properly set to true');
+      console.log('💡 The system should have N8N_TRUST_PROXY="true" in environment');
+      console.log('💡 Current N8N_TRUST_PROXY value:', process.env.N8N_TRUST_PROXY);
+    }
   });
 
   n8nProcess.on('error', (err) => {
@@ -169,7 +181,7 @@ const startApplication = async () => {
       ? `https://${process.env.HEROKU_APP_NAME}.herokuapp.com` 
       : `http://localhost:${port}`);
   
-  console.log('✅ n8n process started with monitoring. Dashboard available at:', appUrl);
+  console.log('✅ n8n process started with proxy configuration. Dashboard available at:', appUrl);
   
   // Log the dashboard URL after a delay to let n8n start
   setTimeout(() => {
@@ -180,6 +192,7 @@ const startApplication = async () => {
     console.log(`   Workflow Status: ${appUrl}/workflow-status`);
     console.log('');
     console.log('💡 Login credentials: Use the N8N_BASIC_AUTH_USER and N8N_BASIC_AUTH_PASSWORD variables');
+    console.log('💡 Proxy settings: N8N_TRUST_PROXY is set to true to handle Railway load balancer');
   }, 10000);
 
   return n8nProcess;
