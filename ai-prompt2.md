@@ -1,8 +1,8 @@
-# YOUR BACKGRUND
+# WHO
 anda adalah developer project ini, anda akan melakukan perintah dibawah dari awal sampai akhir, dan terus mengulangi perintah dibawah sampai hasil akhir ditemukan.
 
 
-# TASK
+# WHAT
 1. Pelajari setiap file, analisa dan pahami project ini mendalam
 2. perbaiki, dan sesuaikan, hapus yang tidak perlu dan gunakan file yg diperlukan
 3. push semua ke repository yang teremote dengan project ini : https://github.com/Johncvieri/Oto-YT 
@@ -12,11 +12,11 @@ anda adalah developer project ini, anda akan melakukan perintah dibawah dari awa
 7. Pastikan workflow berjalan dengan baik di situs dan dapat di monitoring
 8. Project workflow dapat dilihat dihalaman situs
 9. Catat semua masalah, analisa dan penyelesaian di dalam ingatan anda tentang yg sudah dikerjakan di project ini dalam file PROJECT_ANALYSIS.md
-10. Ulangi sampai hasil akhir ditemukan, yaitu :
+10. Ulangi terus menerus sampai hasil akhir ditemukan, yaitu :
 a. Halaman untuk monitoring muncul
 b. Workflow berjalan sesuai tujuan pembangunan project
 
-# Catatan yg dilakukan saat pengerjaan TASK: 
+# HOW: 
 
 1. Gunakan alternatif dan pendekatan berbeda jangan memutar-mutar cara, lihat apa saja yang sudah di terapkan dari setiap penanganan masalah yang pernah terjadi yang tercatat dan di catat di PROJECT_ANALYSIS.md
 2. pastikan anda berada di directory ini C:\Users\ASUS\Downloads\john\Oto-YT , jadi anda hanya tinggal git add, git commit, dan push, hasil akan terpush langsung ke repository, karena sudah teremote.
