@@ -31,14 +31,17 @@ module.exports = {
   // Security
   // User management settings - CRITICAL for auth vs setup page  
   userManagement: {
-    enabled: process.env.N8N_USER_MANAGEMENT_ENABLED !== 'false', // Enable user management
-    isInstanceOwnerSetUp: process.env.N8N_INSTANCE_OWNER_CREATED === 'true', // Set to true when default user is created via env vars
-    skipInstanceOwnerSetup: process.env.N8N_SKIP_SETUP_WIZARD !== 'false', // Skip the initial setup wizard if we're using env vars
+    enabled: process.env.N8N_USER_MANAGEMENT_ENABLED === 'true', // Enable user management when explicitly set
+    isInstanceOwnerSetUp: true, // Skip setup flow for production
+    skipInstanceOwnerSetup: true, // Skip the initial setup wizard entirely
   },
   
-  // Basic auth should be disabled when user management is enabled with default user
-  // The authentication will be handled by the user management system instead
   security: {
+    basicAuth: {
+      active: process.env.N8N_BASIC_AUTH_ACTIVE === 'true', // Enable basic auth
+      user: process.env.N8N_BASIC_AUTH_USER || 'admin',
+      password: process.env.N8N_BASIC_AUTH_PASSWORD || 'password'
+    },
     excludeCredentialsFromResponse: false, // Ensure credentials work properly
   },
 

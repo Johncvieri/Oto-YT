@@ -110,3 +110,11 @@ Let me check the n8n config file to ensure basic auth is properly configured the
   3. Removed basic auth from security config since user management handles authentication
 
 This should result in the system properly authenticating users with the configured credentials rather than showing the main dashboard without authentication.
+
+## New Approach
+- Date: Senin, 20 Oktober 2025
+- Changed strategy to disable user management and enable basic auth
+- In railway.json: set N8N_USER_MANAGEMENT_ENABLED to "false" and N8N_USER_MANAGEMENT_DISABLED to "true"
+- This should force n8n to use basic authentication instead of user management
+- With basic auth active and user management disabled, the system should prompt for credentials
+- Credentials should be: username johncvieri, password @John221198

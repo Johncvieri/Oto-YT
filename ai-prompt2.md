@@ -25,3 +25,4 @@ b. Workflow berjalan sesuai tujuan pembangunan project
 5. API Token Railway to acces railway account=622fffa8-75d3-4330-b405-792d7b674afb
 6. Untuk penginstallan gunakan teknik untuk laptop low spec agar tidak crash, stuck dll, usahakan agar instalasi tidak lebih dari 30 menit jika lebih pastikan itu tidak akan crash atau stuck
 7. Jika terjadi stuck, crash, hapus cache agar laptop tidak melambat dan proses melambat atau gunakan pendeketan yang aman untuk laptop low spec
+8. email saya : johnchristianvieri@gmail.com
