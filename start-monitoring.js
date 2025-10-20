@@ -5,8 +5,20 @@
  * CRITICAL: Ensures proxy settings are correctly configured for Railway
  */
 
-// CRITICAL: Load preload configuration FIRST to prevent proxy errors
-require('./preload-config');
+// CRITICAL: Apply all Railway configurations before starting n8n
+// This addresses the fundamental X-Forwarded-For error
+process.env.N8N_TRUST_PROXY = 'true';  // MOST CRITICAL SETTING FOR RAILWAY
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+process.env.N8N_PROXY_HOST = process.env.RAILWAY_PUBLIC_HOST || '0.0.0.0';
+process.env.N8N_PROXY_PORT = '443';
+process.env.N8N_PROXY_SSL = 'true';
+process.env.N8N_ROOT_URL = process.env.WEBHOOK_URL || `https://${process.env.RAILWAY_PUBLIC_HOST || 'localhost:5678'}`;
+process.env.N8N_PROTOCOL = 'https';
+
+// Apply your specific configuration from .env
+process.env.EXECUTIONS_PROCESS = process.env.EXECUTIONS_PROCESS || 'main';
+process.env.N8N_RUNNERS_ENABLED = process.env.N8N_RUNNERS_ENABLED || 'true';
+process.env.TZ = process.env.TZ || 'Asia/Jakarta';
 
 const { spawn } = require('child_process');
 const http = require('http');

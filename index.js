@@ -1,14 +1,23 @@
 /**
- * YouTube Automation System - Main Entry Point
+ * YouTube Automation System - Main Entry Point with Railway Optimized Configuration
  * 
  * Following successful Railway deployment approach based on .env configuration
  */
 
-// CRITICAL: Load preload configuration FIRST to prevent proxy errors
-require('./preload-config');
+// CRITICAL: Apply all Railway configurations before ANY other operations
+// This addresses the fundamental X-Forwarded-For error
+process.env.N8N_TRUST_PROXY = 'true';  // MOST CRITICAL SETTING FOR RAILWAY
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+process.env.N8N_PROXY_HOST = process.env.RAILWAY_PUBLIC_HOST || '0.0.0.0';
+process.env.N8N_PROXY_PORT = '443';
+process.env.N8N_PROXY_SSL = 'true';
+process.env.N8N_ROOT_URL = process.env.WEBHOOK_URL || `https://${process.env.RAILWAY_PUBLIC_HOST || 'localhost:5678'}`;
+process.env.N8N_PROTOCOL = 'https';
 
-// Load environment configuration for Railway deployment
-require('./config/railway-setup');
+// Apply your specific configuration from .env
+process.env.EXECUTIONS_PROCESS = process.env.EXECUTIONS_PROCESS || 'main';
+process.env.N8N_RUNNERS_ENABLED = process.env.N8N_RUNNERS_ENABLED || 'true';
+process.env.TZ = process.env.TZ || 'Asia/Jakarta';
 
 // Additional monitoring and settings
 process.env.N8N_USER_MANAGEMENT_DISABLED = 'false';  // Enable for better monitoring
@@ -17,14 +26,22 @@ process.env.N8N_HEADLESS = 'false';                 // Enable for dashboard acce
 process.env.N8N_METRICS = 'true';
 process.env.N8N_DIAGNOSTICS_ENABLED = 'true';
 
-// Load environment early (though already handled in railway-setup.js)
+// Load environment early (this may override some settings if in .env)
 require('dotenv').config();
+
+// Ensure critical settings remain after dotenv load
+process.env.N8N_TRUST_PROXY = 'true';  // RE-ENSURE this critical setting
+process.env.N8N_PROTOCOL = 'https';    // RE-ENSURE HTTPS for Railway
 
 // Additional monitoring setup
 process.env.N8N_TELEMETRY_ENABLED = 'false';  // Disable for privacy
 process.env.N8N_INTERNAL_HOOKS_DISABLED = 'false';  // Enable for monitoring
 process.env.N8N_EXECUTIONS_DATA_SAVE_PER_WORKFLOW = 'true';
 process.env.N8N_EXECUTIONS_DATA_PRUNE = 'false';  // Keep execution data for monitoring
+
+console.log('🔧 Critical proxy configuration applied:');
+console.log(`   N8N_TRUST_PROXY: ${process.env.N8N_TRUST_PROXY} (CRITICAL!)`);
+console.log(`   N8N_ROOT_URL: ${process.env.N8N_ROOT_URL}`);
 
 // Load required modules after setting environment
 const path = require('path');
