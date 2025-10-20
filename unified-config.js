@@ -10,6 +10,9 @@ process.env.N8N_TRUST_PROXY = 'true';           // Critical for Railway's load b
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Required for proxy handling
 process.env.N8N_PROTOCOL = 'https';             // Required for Railway HTTPS
 
+// Tell n8n to use our configuration file
+process.env.N8N_CONFIG_FILES = './config/n8n.config.js';
+
 // Load environment variables from .env file
 require('dotenv').config();
 
@@ -73,6 +76,7 @@ process.env.N8N_USER_MANAGEMENT_DISABLED = 'false'; // CRITICAL - enable user ma
 
 console.log('✅ Unified configuration applied:');
 console.log(`   N8N_TRUST_PROXY: ${process.env.N8N_TRUST_PROXY} (CRITICAL!)`);
+console.log(`   N8N_CONFIG_FILES: ${process.env.N8N_CONFIG_FILES} (ENSURING CONFIG FILE READ!)`);
 console.log(`   N8N_BASIC_AUTH_ACTIVE: ${process.env.N8N_BASIC_AUTH_ACTIVE} (MUST BE true FOR AUTH!)`);
 console.log(`   N8N_DISABLE_UI: ${process.env.N8N_DISABLE_UI}`);
 console.log(`   N8N_HEADLESS: ${process.env.N8N_HEADLESS}`);

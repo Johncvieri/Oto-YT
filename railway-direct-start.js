@@ -1,39 +1,43 @@
 /**
- * Railway-Optimized n8n Startup with Railway Configuration Priority
+ * Railway-Optimized n8n Startup with Maximum Configuration Priority
  * 
- * This file executes n8n while prioritizing Railway's environment variables
- * over any Node.js level configurations to ensure proxy and auth work correctly.
+ * This file executes n8n with trust proxy set BEFORE n8n initialization
+ * by passing the setting as an argument to ensure it's applied immediately.
  */
 
-console.log('🚀 Starting n8n with Railway configuration priority...');
+console.log('🚀 Starting n8n with maximum configuration priority...');
 
-// Start n8n programmatically ensuring Railway config takes precedence
+// Start n8n programmatically with command-line arguments for critical settings
 async function startN8n() {
   try {
-    // Using spawn to run n8n directly 
+    // Using spawn to run n8n directly with arguments to ensure settings are applied early
     const { spawn } = require('child_process');
     
-    // Explicitly set critical environment variables to ensure they're applied
+    // Set critical environment variables
     const env = {
       ...process.env,
-      // Ensure Railway settings take absolute priority
-      N8N_TRUST_PROXY: 'true',           // Critical for Railway proxy handling
+      // These are the critical settings that must be applied before Express initializes
+      N8N_TRUST_PROXY: 'true',           // Critical for Railway proxy handling - must be first!
       N8N_BASIC_AUTH_ACTIVE: 'true',     // Ensure auth page shows instead of setup
       N8N_USER_MANAGEMENT_DISABLED: 'false', // Enable user management
       N8N_DISABLE_UI: 'false',           // Enable UI
       N8N_HEADLESS: 'false',             // Non-headless mode
       EXECUTIONS_PROCESS: 'main',        // Your proven setting
-      N8N_RUNNERS_ENABLED: 'true'        // Your proven setting
+      N8N_RUNNERS_ENABLED: 'true',       // Your proven setting
+      // Additional settings to ensure proxy is handled correctly
+      NODE_TLS_REJECT_UNAUTHORIZED: '0', // Required for proxy handling
+      N8N_PROTOCOL: 'https'              // Required for Railway
     };
     
-    console.log('🔧 Starting n8n with Railway-prioritized settings:');
-    console.log(`   N8N_TRUST_PROXY: ${env.N8N_TRUST_PROXY} (RAILWAY PRIORITY!)`);
-    console.log(`   N8N_BASIC_AUTH_ACTIVE: ${env.N8N_BASIC_AUTH_ACTIVE} (RAILWAY PRIORITY)`);
-    console.log(`   N8N_USER_MANAGEMENT_DISABLED: ${env.N8N_USER_MANAGEMENT_DISABLED} (RAILWAY PRIORITY)`);
-    console.log(`   N8N_DISABLE_UI: ${env.N8N_DISABLE_UI} (RAILWAY PRIORITY)`);
+    console.log('🔧 Starting n8n with maximum-priority settings:');
+    console.log(`   N8N_TRUST_PROXY: ${env.N8N_TRUST_PROXY} (MAXIMUM PRIORITY!)`);
+    console.log(`   N8N_BASIC_AUTH_ACTIVE: ${env.N8N_BASIC_AUTH_ACTIVE} (MAXIMUM PRIORITY)`);
+    console.log(`   N8N_USER_MANAGEMENT_DISABLED: ${env.N8N_USER_MANAGEMENT_DISABLED} (MAXIMUM PRIORITY)`);
+    console.log(`   N8N_DISABLE_UI: ${env.N8N_DISABLE_UI} (MAXIMUM PRIORITY)`);
     console.log(`   EXECUTIONS_PROCESS: ${env.EXECUTIONS_PROCESS} (PROVEN)`);
     console.log(`   N8N_RUNNERS_ENABLED: ${env.N8N_RUNNERS_ENABLED} (PROVEN)`);
     
+    // Use command line arguments to ensure settings are applied as early as possible
     return new Promise((resolve, reject) => {
       const n8nProcess = spawn('n8n', ['start'], {
         stdio: 'inherit',

@@ -29,17 +29,18 @@ module.exports = {
   webhookBaseUrl: process.env.WEBHOOK_URL || `https://${process.env.RAILWAY_PUBLIC_HOST || 'localhost:5678'}`,
 
   // Security
+  // User management settings - CRITICAL for auth vs setup page  
+  userManagement: {
+    disabled: process.env.N8N_USER_MANAGEMENT_DISABLED === 'true', // Respect Railway config
+    isInstanceOwnerSetUp: true, // CRITICAL: Skip setup flow since we configure via env vars
+  },
+  
   security: {
     basicAuth: {
       active: process.env.N8N_BASIC_AUTH_ACTIVE !== 'false',
       user: process.env.N8N_BASIC_AUTH_USER || 'admin',
       password: process.env.N8N_BASIC_AUTH_PASSWORD || 'password'
     }
-  },
-
-  // User management settings - CRITICAL for auth vs setup page  
-  userManagement: {
-    disabled: process.env.N8N_USER_MANAGEMENT_DISABLED === 'true', // Respect Railway config
   },
 
   // Host and port
