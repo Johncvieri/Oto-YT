@@ -39,9 +39,8 @@ Ikuti langkah-langkah ini satu arah (tidak boleh melompat):
 
 ### STEP 2 — System Cleanup
 
-* Hapus semua file & konfigurasi Docker.
-* Hapus script setup manual atau lokal.
-* Bersihkan cache, log, dan folder `node_modules` jika ada sisa build lama.
+* Pahami dahulu project file dan masalah yg ditulis di PROJECT_ANALYSIS.md
+* Hapus script yg conflict
 * Jangan install apapun lewat terminal — deployment akan dilakukan otomatis oleh Railway.
 
 ### STEP 3 — Compatibility & Modernization
@@ -135,7 +134,7 @@ Hasil akhir dianggap selesai jika:
 
 ---
 
-## 🔄 LOOP RULE
+## 🔄 STEP LOOP RULE
 
 * Qwen wajib **mengulangi langkah dari STEP 2** jika ada error apapun di sistem.
 * Tidak boleh berhenti hingga seluruh checklist final ✅.
@@ -143,7 +142,7 @@ Hasil akhir dianggap selesai jika:
 
 ---
 
-## 🔐 Railway & Access
+## 🔐 STEP Railway & Access
 
 * Railway Project ID: `15b9723a-aa56-4e25-92fb-c435fac78885`
 * Railway Token: `622fffa8-75d3-4330-b405-792d7b674afb`
@@ -153,7 +152,7 @@ Hasil akhir dianggap selesai jika:
 
 ---
 
-## 📌 NOTE
+## 📌 NOTE STEP
 
 * Jangan test secara lokal.
 * Semua test dilakukan lewat Railway deployment.
