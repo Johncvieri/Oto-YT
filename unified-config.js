@@ -13,6 +13,9 @@ process.env.N8N_PROTOCOL = 'https';             // Required for Railway HTTPS
 // Tell n8n to use our configuration file
 process.env.N8N_CONFIG_FILES = './config/n8n.config.js';
 
+// Additional critical settings from n8n documentation
+process.env.N8N_USER_MANAGEMENT_ENABLED = 'true'; // According to documentation
+
 // Load environment variables from .env file
 require('dotenv').config();
 

@@ -31,6 +31,7 @@ module.exports = {
   // Security
   // User management settings - CRITICAL for auth vs setup page  
   userManagement: {
+    enabled: process.env.N8N_USER_MANAGEMENT_ENABLED === 'true', // From documentation
     disabled: process.env.N8N_USER_MANAGEMENT_DISABLED === 'true', // Respect Railway config
     isInstanceOwnerSetUp: true, // CRITICAL: Skip setup flow since we configure via env vars
   },

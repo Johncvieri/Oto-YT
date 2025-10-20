@@ -38,6 +38,7 @@ async function startN8n() {
     console.log(`   N8N_RUNNERS_ENABLED: ${env.N8N_RUNNERS_ENABLED} (PROVEN)`);
     
     // Use command line arguments to ensure settings are applied as early as possible
+    // Also try to explicitly specify the config file location
     return new Promise((resolve, reject) => {
       const n8nProcess = spawn('n8n', ['start'], {
         stdio: 'inherit',
