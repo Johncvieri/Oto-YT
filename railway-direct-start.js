@@ -1,54 +1,32 @@
 /**
- * Railway-Optimized n8n Startup - Direct Execution Approach
+ * Railway-Optimized n8n Startup with Unified Configuration
  * 
- * This file directly executes n8n with your proven configuration settings
- * to ensure immediate success based on your .env setup.
+ * This file directly executes n8n with unified configuration settings
+ * to ensure consistency across the application.
  */
 
-// Apply critical proxy settings from your proven .env FIRST, before anything else
-process.env.N8N_TRUST_PROXY = 'true';  // Critical for Railway - prevents X-Forwarded-For error
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';  // Required for proxy handling
-process.env.N8N_PROTOCOL = 'https';  // Required for Railway HTTPS
+// NOTE: Configuration is now handled by unified-config.js
+// This file focuses only on the startup process itself
 
-// Apply your proven execution settings from .env
-process.env.EXECUTIONS_PROCESS = 'main';  // As per your successful .env configuration
-process.env.N8N_RUNNERS_ENABLED = 'true';  // As per your successful .env configuration
+console.log('🚀 Starting n8n with unified configuration...');
 
-// IMPORTANT: Don't override auth/UI settings that are configured in railway.json
-// Let railway.json handle auth settings to ensure access to auth page
-// process.env.N8N_BASIC_AUTH_ACTIVE = 'true';  // Let railway.json handle this
-// process.env.N8N_DISABLE_UI = 'false';       // Let railway.json handle this  
-// process.env.N8N_HEADLESS = 'false';         // Let railway.json handle this
-// process.env.N8N_USER_MANAGEMENT_DISABLED = 'false';  // Let railway.json handle this
-
-// Load environment to get other settings
-require('dotenv').config();
-
-// Ensure critical settings remain
-process.env.N8N_TRUST_PROXY = 'true';  // Critical - don't let .env override
-process.env.N8N_PROTOCOL = 'https';    // Critical - don't let .env override
-process.env.EXECUTIONS_PROCESS = 'main';  // Your proven setting
-process.env.N8N_RUNNERS_ENABLED = 'true'; // Your proven setting
-
-console.log('🚀 Starting n8n with Railway-optimized configuration:');
-console.log(`   N8N_TRUST_PROXY: ${process.env.N8N_TRUST_PROXY} (CRITICAL - prevents proxy error!)`);
-console.log(`   EXECUTIONS_PROCESS: ${process.env.EXECUTIONS_PROCESS} (your proven setting)`);
-console.log(`   N8N_RUNNERS_ENABLED: ${process.env.N8N_RUNNERS_ENABLED} (your proven setting)`);
-console.log(`   Auth settings: Respecting railway.json configuration for auth page access`);
-
-// Start n8n programmatically with your proven settings
+// Start n8n programmatically with unified settings
 async function startN8n() {
   try {
-    // Using spawn to run n8n directly with proper proxy settings
+    // Using spawn to run n8n directly with unified settings
     const { spawn } = require('child_process');
     
-    // Set up environment with proxy configurations
+    // Use the current process environment which has unified configuration
     const env = {
-      ...process.env,
-      N8N_TRUST_PROXY: 'true',
-      EXECUTIONS_PROCESS: 'main',
-      N8N_RUNNERS_ENABLED: 'true'
+      ...process.env
     };
+    
+    console.log('🔧 Starting n8n with settings:');
+    console.log(`   N8N_TRUST_PROXY: ${env.N8N_TRUST_PROXY} (CRITICAL!)`);
+    console.log(`   N8N_BASIC_AUTH_ACTIVE: ${env.N8N_BASIC_AUTH_ACTIVE} (UNIFIED)`);
+    console.log(`   N8N_DISABLE_UI: ${env.N8N_DISABLE_UI} (UNIFIED)`);
+    console.log(`   EXECUTIONS_PROCESS: ${env.EXECUTIONS_PROCESS} (UNIFIED)`);
+    console.log(`   N8N_RUNNERS_ENABLED: ${env.N8N_RUNNERS_ENABLED} (UNIFIED)`);
     
     return new Promise((resolve, reject) => {
       const n8nProcess = spawn('n8n', ['start'], {

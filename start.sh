@@ -1,19 +1,13 @@
 #!/bin/bash
-# Headless Startup script for YouTube Automation System
+# Unified Startup script for YouTube Automation System
 
-echo "🚀 Starting YouTube Automation System (Headless Mode)..."
+echo "🚀 Starting YouTube Automation System (With UI)..."
 
-# Set environment variables for headless operation
-export N8N_DISABLE_UI=true
-export N8N_HEADLESS=true
-export N8N_USER_MANAGEMENT_DISABLED=true
-export N8N_METRICS=false
-export N8N_NPS_DISABLED=true
-export N8N_TELEMETRY_DISABLED=true
-export N8N_TRUST_PROXY=1
+# Set minimal critical environment variables
+export N8N_TRUST_PROXY=1  # Critical for Railway proxy handling
 
-echo "🔐 Headless environment configured"
+echo "🔐 Essential environment variables configured"
 
-# Start n8n in headless mode (no workflow import needed)
-echo "🎬 Starting n8n in headless mode..."
+# Start n8n with unified configuration
+echo "🎬 Starting n8n with unified configuration..."
 exec npm start
