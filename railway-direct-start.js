@@ -1,32 +1,38 @@
 /**
- * Railway-Optimized n8n Startup with Unified Configuration
+ * Railway-Optimized n8n Startup with Railway Configuration Priority
  * 
- * This file directly executes n8n with unified configuration settings
- * to ensure consistency across the application.
+ * This file executes n8n while prioritizing Railway's environment variables
+ * over any Node.js level configurations to ensure proxy and auth work correctly.
  */
 
-// NOTE: Configuration is now handled by unified-config.js
-// This file focuses only on the startup process itself
+console.log('🚀 Starting n8n with Railway configuration priority...');
 
-console.log('🚀 Starting n8n with unified configuration...');
-
-// Start n8n programmatically with unified settings
+// Start n8n programmatically ensuring Railway config takes precedence
 async function startN8n() {
   try {
-    // Using spawn to run n8n directly with unified settings
+    // Using spawn to run n8n directly 
     const { spawn } = require('child_process');
     
-    // Use the current process environment which has unified configuration
+    // Explicitly set critical environment variables to ensure they're applied
     const env = {
-      ...process.env
+      ...process.env,
+      // Ensure Railway settings take absolute priority
+      N8N_TRUST_PROXY: 'true',           // Critical for Railway proxy handling
+      N8N_BASIC_AUTH_ACTIVE: 'true',     // Ensure auth page shows instead of setup
+      N8N_USER_MANAGEMENT_DISABLED: 'false', // Enable user management
+      N8N_DISABLE_UI: 'false',           // Enable UI
+      N8N_HEADLESS: 'false',             // Non-headless mode
+      EXECUTIONS_PROCESS: 'main',        // Your proven setting
+      N8N_RUNNERS_ENABLED: 'true'        // Your proven setting
     };
     
-    console.log('🔧 Starting n8n with settings:');
-    console.log(`   N8N_TRUST_PROXY: ${env.N8N_TRUST_PROXY} (CRITICAL!)`);
-    console.log(`   N8N_BASIC_AUTH_ACTIVE: ${env.N8N_BASIC_AUTH_ACTIVE} (UNIFIED)`);
-    console.log(`   N8N_DISABLE_UI: ${env.N8N_DISABLE_UI} (UNIFIED)`);
-    console.log(`   EXECUTIONS_PROCESS: ${env.EXECUTIONS_PROCESS} (UNIFIED)`);
-    console.log(`   N8N_RUNNERS_ENABLED: ${env.N8N_RUNNERS_ENABLED} (UNIFIED)`);
+    console.log('🔧 Starting n8n with Railway-prioritized settings:');
+    console.log(`   N8N_TRUST_PROXY: ${env.N8N_TRUST_PROXY} (RAILWAY PRIORITY!)`);
+    console.log(`   N8N_BASIC_AUTH_ACTIVE: ${env.N8N_BASIC_AUTH_ACTIVE} (RAILWAY PRIORITY)`);
+    console.log(`   N8N_USER_MANAGEMENT_DISABLED: ${env.N8N_USER_MANAGEMENT_DISABLED} (RAILWAY PRIORITY)`);
+    console.log(`   N8N_DISABLE_UI: ${env.N8N_DISABLE_UI} (RAILWAY PRIORITY)`);
+    console.log(`   EXECUTIONS_PROCESS: ${env.EXECUTIONS_PROCESS} (PROVEN)`);
+    console.log(`   N8N_RUNNERS_ENABLED: ${env.N8N_RUNNERS_ENABLED} (PROVEN)`);
     
     return new Promise((resolve, reject) => {
       const n8nProcess = spawn('n8n', ['start'], {

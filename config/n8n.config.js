@@ -31,10 +31,15 @@ module.exports = {
   // Security
   security: {
     basicAuth: {
-      active: process.env.N8N_BASIC_AUTH_ACTIVE === 'true',
+      active: process.env.N8N_BASIC_AUTH_ACTIVE !== 'false',
       user: process.env.N8N_BASIC_AUTH_USER || 'admin',
       password: process.env.N8N_BASIC_AUTH_PASSWORD || 'password'
     }
+  },
+
+  // User management settings - CRITICAL for auth vs setup page  
+  userManagement: {
+    disabled: process.env.N8N_USER_MANAGEMENT_DISABLED === 'true', // Respect Railway config
   },
 
   // Host and port

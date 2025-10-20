@@ -1,19 +1,19 @@
 /**
- * Unified Configuration for Railway Deployment
+ * Unified Configuration for Railway Deployment with Early Proxy Setup
  * 
  * This file provides a single source of truth for all critical configurations
- * to eliminate conflicts between different configuration files.
+ * and ensures proxy settings are applied BEFORE any Express modules load.
  */
 
-// Load environment variables from .env file first
-require('dotenv').config();
-
-console.log('🔧 Loading unified configuration...');
-
-// CRITICAL: Apply proxy settings FIRST, before any other configuration
+// CRITICAL: Apply proxy settings BEFORE loading any other modules that might initialize Express
 process.env.N8N_TRUST_PROXY = 'true';           // Critical for Railway's load balancer
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Required for proxy handling
 process.env.N8N_PROTOCOL = 'https';             // Required for Railway HTTPS
+
+// Load environment variables from .env file
+require('dotenv').config();
+
+console.log('🔧 Loading unified configuration...');
 
 // Apply Railway-specific root URL configuration
 process.env.N8N_ROOT_URL = process.env.N8N_ROOT_URL || 
@@ -30,7 +30,7 @@ process.env.EXECUTIONS_PROCESS = process.env.EXECUTIONS_PROCESS || 'main';
 process.env.N8N_RUNNERS_ENABLED = process.env.N8N_RUNNERS_ENABLED || 'true';
 
 // CRITICAL: Authentication and UI settings (consistent across the application)
-process.env.N8N_BASIC_AUTH_ACTIVE = 'true';           // Enable basic auth
+process.env.N8N_BASIC_AUTH_ACTIVE = 'true';           // Enable basic auth to show auth page instead of setup
 process.env.N8N_DISABLE_UI = 'false';                 // Enable UI for monitoring
 process.env.N8N_HEADLESS = 'false';                   // Non-headless mode
 process.env.N8N_USER_MANAGEMENT_DISABLED = 'false';   // Enable user management for monitoring
@@ -63,17 +63,17 @@ process.env.N8N_PERSONALIZATION_ENABLED = 'false';
 process.env.N8N_TELEMETRY_DISABLED = 'true';
 process.env.N8N_NPS_DISABLED = 'true';
 
-// Ensure critical settings remain after loading .env
+// FINAL CHECK: Ensure critical settings remain after loading .env
 process.env.N8N_TRUST_PROXY = 'true';           // CRITICAL - prevent .env override
 process.env.N8N_PROTOCOL = 'https';             // CRITICAL - ensure HTTPS
-process.env.N8N_BASIC_AUTH_ACTIVE = 'true';     // CRITICAL - ensure auth
+process.env.N8N_BASIC_AUTH_ACTIVE = 'true';     // CRITICAL - ensure auth page (not setup)
 process.env.N8N_DISABLE_UI = 'false';           // CRITICAL - enable UI
 process.env.N8N_HEADLESS = 'false';             // CRITICAL - non-headless
 process.env.N8N_USER_MANAGEMENT_DISABLED = 'false'; // CRITICAL - enable user management
 
 console.log('✅ Unified configuration applied:');
 console.log(`   N8N_TRUST_PROXY: ${process.env.N8N_TRUST_PROXY} (CRITICAL!)`);
-console.log(`   N8N_BASIC_AUTH_ACTIVE: ${process.env.N8N_BASIC_AUTH_ACTIVE}`);
+console.log(`   N8N_BASIC_AUTH_ACTIVE: ${process.env.N8N_BASIC_AUTH_ACTIVE} (MUST BE true FOR AUTH!)`);
 console.log(`   N8N_DISABLE_UI: ${process.env.N8N_DISABLE_UI}`);
 console.log(`   N8N_HEADLESS: ${process.env.N8N_HEADLESS}`);
 console.log(`   N8N_USER_MANAGEMENT_DISABLED: ${process.env.N8N_USER_MANAGEMENT_DISABLED}`);
