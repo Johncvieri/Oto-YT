@@ -47,6 +47,8 @@
     "N8N_NPS_DISABLED": {"value": "true", "type": "string"},
     "N8N_TELEMETRY_DISABLED": {"value": "true", "type": "string"},
     "N8N_INTERNAL_HOOKS_DISABLED": {"value": "false", "type": "string"},
+    "N8N_CONFIG_FILES": {"value": "./config/n8n.config.js", "type": "string"},
+    "NODE_OPTIONS": {"value": "--require ./early-proxy-setup.js", "type": "string"},
     "NIXPACKS_NODE_PRUNE": {"value": "true", "type": "string"},
     "NPM_CONFIG_PRODUCTION": {"value": "false", "type": "string"}
   },
