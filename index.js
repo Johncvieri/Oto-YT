@@ -1,44 +1,23 @@
 /**
- * YouTube Automation System with Enhanced Proxy Configuration - Main Entry Point
+ * YouTube Automation System - Main Entry Point
  * 
- * This version specifically addresses the X-Forwarded-For error in Railway deployment
+ * Following successful Railway deployment approach based on .env configuration
  */
 
-// Enable monitoring and proxy settings before importing other modules
+// Load environment configuration for Railway deployment
+require('./config/railway-setup');
+
+// Additional monitoring and settings
 process.env.N8N_USER_MANAGEMENT_DISABLED = 'false';  // Enable for better monitoring
 process.env.N8N_DISABLE_UI = 'false';               // Enable UI for access
 process.env.N8N_HEADLESS = 'false';                 // Enable for dashboard access
 process.env.N8N_METRICS = 'true';
 process.env.N8N_DIAGNOSTICS_ENABLED = 'true';
 
-// Load environment early
+// Load environment early (though already handled in railway-setup.js)
 require('dotenv').config();
 
-// CRITICAL: Proxy configuration for Railway - Must be set before n8n starts
-process.env.N8N_TRUST_PROXY = 'true';  // This is the key to fixing the X-Forwarded-For error
-process.env.N8N_ROOT_URL = process.env.WEBHOOK_URL || `https://${process.env.RAILWAY_PUBLIC_HOST || 'localhost:5678'}`;
-process.env.N8N_PROTOCOL = 'https';
-process.env.N8N_PATH = '/';
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Required for proxy handling
-
-// Additional settings to address proxy validation
-process.env.N8N_PROXY_HOST = process.env.RAILWAY_PUBLIC_HOST || '0.0.0.0';
-process.env.N8N_PROXY_PORT = process.env.PORT || '443';
-process.env.N8N_PROXY_SSL = 'true';
-
-// Database configuration
-process.env.N8N_DB_TYPE = 'sqlite';
-process.env.DB_SQLITE_PATH = './n8n-database.db';
-process.env.N8N_EXECUTIONS_MODE = 'regular';
-
-// Security & Authentication
-process.env.N8N_BASIC_AUTH_ACTIVE = process.env.N8N_BASIC_AUTH_ACTIVE || 'true';
-process.env.N8N_SECURE_COOKIE = process.env.N8N_SECURE_COOKIE || 'true';
-process.env.N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS = 'false';
-process.env.N8N_PERSONALIZATION_ENABLED = 'false';
-
-// Monitoring setup
-process.env.N8N_HEALTH_CHECKER = 'true';
+// Additional monitoring setup
 process.env.N8N_TELEMETRY_ENABLED = 'false';  // Disable for privacy
 process.env.N8N_INTERNAL_HOOKS_DISABLED = 'false';  // Enable for monitoring
 process.env.N8N_EXECUTIONS_DATA_SAVE_PER_WORKFLOW = 'true';
